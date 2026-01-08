@@ -45,7 +45,7 @@
             flex-direction: column;
         }
 
-        /* Navigasyon */
+        /* Navigasyon - Varsayılan (Masaüstü) */
         nav {
             position: fixed;
             top: 0;
@@ -75,6 +75,8 @@
             display: flex;
             gap: 2.5rem;
             list-style: none;
+            justify-content: center;
+            width: 100%;
         }
 
         .nav-links a {
@@ -87,6 +89,7 @@
             border-bottom: 1px solid transparent;
             font-weight: 400;
             text-transform: uppercase;
+            white-space: nowrap; /* Kelimelerin bölünmesini engeller */
         }
 
         .nav-links a:hover, .nav-links a.active {
@@ -271,7 +274,7 @@
             margin-top: 0.3rem;
         }
 
-        /* Responsive */
+        /* Responsive Kuralları */
         @media (min-width: 1001px) {
             .venue-name, .venue-description, .venue-meta, .links-container {
                 margin-left: -100px;
@@ -285,22 +288,46 @@
             }
         }
         
+        /* MOBİL DÜZELTMELER */
         @media (max-width: 768px) {
-            nav { padding: 2.5rem 0; }
-            .nav-title { font-size: 2rem; letter-spacing: 0.3rem; }
-            main { padding-top: 240px; }
-            .nav-links { gap: 1.5rem; }
+            nav { 
+                position: relative; /* Sabitliği kaldırıldı */
+                padding: 2rem 0; 
+            }
+            .nav-title { 
+                font-size: 1.8rem; 
+                letter-spacing: 0.2rem; 
+            }
+            main { 
+                padding-top: 2rem; /* Üstteki boşluk azaltıldı çünkü nav artık akışta */
+            }
+            .nav-links { 
+                gap: 1rem; 
+            }
+            .nav-links a {
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
-            main { padding-top: 280px; }
             .nav-links {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.8rem;
+                display: flex; /* Grid yerine Flex kullanıp yan yana sığdırıyoruz */
+                flex-wrap: nowrap;
+                justify-content: center;
+                gap: 0.7rem;
+            }
+            .nav-links a {
+                font-size: 0.8rem; /* Font küçültüldü ki yan yana sığsınlar */
+                letter-spacing: 0.05rem;
             }
             .dual-image-container, .triple-image-bottom {
                 gap: 10px;
+            }
+            .venue-name {
+                font-size: 1.4rem;
+            }
+            .venue-description {
+                font-size: 1.05rem;
             }
         }
     </style>
@@ -308,7 +335,7 @@
 <body>
 
     <nav>
-        <div class="nav-title">İTALYA GEZİ GÜNLÜĞÜ</div>
+        <div class="nav-title">İTALYA</div>
         <ul class="nav-links">
             <li><a onclick="showCity('floransa')" id="link-floransa">FLORANSA</a></li>
             <li><a onclick="showCity('roma')" id="link-roma">ROMA</a></li>
@@ -453,7 +480,6 @@
                         li.className = 'venue-item';
                         
                         let imgHtml = '';
-                        // Triple Layout: Üstte 1 geniş, altta 2 dikey resim
                         if (item.layout === "triple" && Array.isArray(item.img) && item.img.length === 3) {
                             imgHtml = `
                                 <div class="triple-image-layout">
@@ -501,6 +527,8 @@
             document.getElementById(cityId).classList.add('active');
             document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
             document.getElementById('link-' + cityId).classList.add('active');
+            
+            // Mobilde menü sabit olmadığı için direkt en üste kaydırıyoruz
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
