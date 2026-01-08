@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>İtalya Gezi Günlüğü</title>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -89,7 +88,7 @@
             border-bottom: 1px solid transparent;
             font-weight: 400;
             text-transform: uppercase;
-            white-space: nowrap; /* Kelimelerin bölünmesini engeller */
+            white-space: nowrap;
         }
 
         .nav-links a:hover, .nav-links a.active {
@@ -291,7 +290,7 @@
         /* MOBİL DÜZELTMELER */
         @media (max-width: 768px) {
             nav { 
-                position: relative; /* Sabitliği kaldırıldı */
+                position: relative; 
                 padding: 2rem 0; 
             }
             .nav-title { 
@@ -299,7 +298,7 @@
                 letter-spacing: 0.2rem; 
             }
             main { 
-                padding-top: 2rem; /* Üstteki boşluk azaltıldı çünkü nav artık akışta */
+                padding-top: 2rem; 
             }
             .nav-links { 
                 gap: 1rem; 
@@ -310,18 +309,24 @@
         }
 
         @media (max-width: 480px) {
+            /* RESİMLERİ ÜST ÜSTE GETİREN KISIM */
+            .dual-image-container, .triple-image-bottom {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .dual-image-container img, .triple-image-bottom img {
+                width: 100%; /* Resimler mobil genişliğine yayılır */
+            }
+
             .nav-links {
-                display: flex; /* Grid yerine Flex kullanıp yan yana sığdırıyoruz */
+                display: flex;
                 flex-wrap: nowrap;
                 justify-content: center;
                 gap: 0.7rem;
             }
             .nav-links a {
-                font-size: 0.8rem; /* Font küçültüldü ki yan yana sığsınlar */
+                font-size: 0.8rem;
                 letter-spacing: 0.05rem;
-            }
-            .dual-image-container, .triple-image-bottom {
-                gap: 10px;
             }
             .venue-name {
                 font-size: 1.4rem;
@@ -534,7 +539,6 @@
             document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
             document.getElementById('link-' + cityId).classList.add('active');
             
-            // Mobilde menü sabit olmadığı için direkt en üste kaydırıyoruz
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
