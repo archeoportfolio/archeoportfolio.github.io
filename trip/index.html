@@ -44,7 +44,7 @@
             flex-direction: column;
         }
 
-        /* Navigasyon - Varsayılan (Masaüstü) */
+        /* Navigasyon - Daraltılmış Versiyon */
         nav {
             position: fixed;
             top: 0;
@@ -57,22 +57,23 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 3rem 0;
+            padding: 0.8rem 0; /* Padding ciddi oranda azaltıldı */
         }
 
         .nav-title {
-            font-size: 2.5rem;
-            letter-spacing: 0.5rem;
+            font-size: 1.8rem; /* Font boyutu biraz optimize edildi */
+            letter-spacing: 0.4rem;
             text-transform: uppercase;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.2rem; /* Başlık ile linkler arası mesafe daraltıldı */
             color: var(--text-main);
             text-align: center;
+            line-height: 1.2;
         }
 
         .nav-links {
             display: flex;
-            gap: 2.5rem;
+            gap: 2rem;
             list-style: none;
             justify-content: center;
             width: 100%;
@@ -81,12 +82,12 @@
         .nav-links a {
             text-decoration: none;
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 0.85rem; /* Link boyutu hafif küçültüldü */
             transition: color 0.2s ease;
             cursor: pointer;
-            padding-bottom: 4px;
+            padding-bottom: 2px;
             border-bottom: 1px solid transparent;
-            font-weight: 400;
+            font-weight: 600;
             text-transform: uppercase;
             white-space: nowrap;
         }
@@ -96,13 +97,13 @@
             border-bottom: 1px solid var(--accent-color);
         }
 
-        /* Ana İçerik */
+        /* Ana İçerik - Menü daraldığı için üst boşluk güncellendi */
         main {
             flex: 1;
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 240px 2rem 100px;
+            padding: 120px 2rem 100px; /* Üst padding menüye göre optimize edildi */
         }
 
         .city-section {
@@ -287,24 +288,25 @@
             }
         }
         
-        /* MOBİL DÜZELTMELER */
+        /* MOBİL DÜZELTMELER - Daraltılmış ve Sabitlenmiş Menü */
         @media (max-width: 768px) {
             nav { 
-                position: relative; 
-                padding: 2rem 0; 
+                position: fixed; /* Mobilde de sabit kalsın */
+                padding: 0.6rem 0; 
             }
             .nav-title { 
-                font-size: 1.8rem; 
+                font-size: 1.4rem; 
                 letter-spacing: 0.2rem; 
+                margin-bottom: 0.1rem;
             }
             main { 
-                padding-top: 2rem; 
+                padding-top: 100px; /* Sabit menü için üst boşluk ayarı */
             }
             .nav-links { 
-                gap: 1rem; 
+                gap: 1.2rem; 
             }
             .nav-links a {
-                font-size: 0.9rem;
+                font-size: 0.75rem;
             }
         }
 
@@ -315,18 +317,18 @@
                 gap: 15px;
             }
             .dual-image-container img, .triple-image-bottom img {
-                width: 100%; /* Resimler mobil genişliğine yayılır */
+                width: 100%;
             }
 
             .nav-links {
                 display: flex;
                 flex-wrap: nowrap;
                 justify-content: center;
-                gap: 0.7rem;
+                gap: 0.8rem;
             }
             .nav-links a {
-                font-size: 0.8rem;
-                letter-spacing: 0.05rem;
+                font-size: 0.7rem;
+                letter-spacing: 0.02rem;
             }
             .venue-name {
                 font-size: 1.4rem;
