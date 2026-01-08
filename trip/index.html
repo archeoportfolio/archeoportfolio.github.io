@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İtalya Gezi Günlüğü</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Değişkenleri & Reset */
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #555555;
+            --border-color: #e5e5e5;
+            --accent-color: #000000;
+            --link-color: #777777;
+            --font-family: 'Crimson Pro', 'Times New Roman', serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            font-size: 18px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasyon */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(8px);
+            border-bottom: 0.5px solid var(--border-color);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 0;
+        }
+
+        .nav-title {
+            font-size: 2.5rem;
+            letter-spacing: 0.5rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+            text-align: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            transition: color 0.2s ease;
+            cursor: pointer;
+            padding-bottom: 4px;
+            border-bottom: 1px solid transparent;
+            font-weight: 400;
+            text-transform: uppercase;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--accent-color);
+        }
+
+        /* Ana İçerik */
+        main {
+            flex: 1;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 240px 2rem 100px;
+        }
+
+        .city-section {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease-out;
+            text-align: left;
+        }
+
+        .city-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Mekan Listesi */
+        .venue-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .venue-item {
+            margin-bottom: 4.5rem;
+            padding-top: 1rem;
+            position: relative;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .venue-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.5rem;
+            text-align: left;
+        }
+
+        .venue-image {
+            width: calc(100% + 200px);
+            max-width: 1000px;
+            margin-left: -100px;
+            height: auto;
+            display: block;
+            margin-bottom: 1.5rem;
+            border-radius: 2px;
+            object-fit: cover;
+            aspect-ratio: 16 / 9;
+            background: #f9f9f9;
+        }
+
+        .dual-image-container {
+            width: calc(100% + 200px);
+            max-width: 1000px;
+            margin-left: -100px;
+            display: flex;
+            gap: 20px;
+            margin-bottom: 1.5rem;
+        }
+
+        .dual-image-container img {
+            width: calc(50% - 10px);
+            height: auto;
+            object-fit: cover;
+            aspect-ratio: 3 / 4;
+            border-radius: 2px;
+            background: #f9f9f9;
+        }
+
+        .triple-image-layout {
+            width: calc(100% + 200px);
+            max-width: 1000px;
+            margin-left: -100px;
+            margin-bottom: 1.5rem;
+        }
+
+        .triple-image-top {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            background: #f9f9f9;
+        }
+
+        .triple-image-bottom {
+            display: flex;
+            gap: 20px;
+        }
+
+        .triple-image-bottom img {
+            width: calc(50% - 10px);
+            height: auto;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            border-radius: 2px;
+            background: #f9f9f9;
+        }
+
+        .venue-description {
+            color: var(--text-main);
+            font-size: 1.15rem;
+            margin-bottom: 0.7rem;
+            display: block;
+            width: 100%;
+            font-weight: 400;
+            text-align: left;
+        }
+
+        .venue-meta {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.4rem;
+            display: block;
+            text-align: left;
+        }
+
+        .links-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .custom-link {
+            font-size: 0.85rem;
+            color: var(--link-color);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .custom-link:hover {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .link-separator {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        footer {
+            text-align: center;
+            padding: 4rem 0;
+            border-top: 0.5px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            line-height: 1.5;
+        }
+
+        footer span {
+            display: block;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-top: 0.3rem;
+        }
+
+        /* Responsive */
+        @media (min-width: 1001px) {
+            .venue-name, .venue-description, .venue-meta, .links-container {
+                margin-left: -100px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .venue-image, .dual-image-container, .triple-image-layout {
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            nav { padding: 2.5rem 0; }
+            .nav-title { font-size: 2rem; letter-spacing: 0.3rem; }
+            main { padding-top: 240px; }
+            .nav-links { gap: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            main { padding-top: 280px; }
+            .nav-links {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+            .dual-image-container, .triple-image-bottom {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-title">İTALYA GEZİ GÜNLÜĞÜ</div>
+        <ul class="nav-links">
+            <li><a onclick="showCity('floransa')" id="link-floransa">FLORANSA</a></li>
+            <li><a onclick="showCity('roma')" id="link-roma">ROMA</a></li>
+            <li><a onclick="showCity('venedik')" id="link-venedik">VENEDİK</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="floransa" class="city-section">
+            <ul class="venue-list" id="list-floransa"></ul>
+        </section>
+
+        <section id="roma" class="city-section">
+            <ul class="venue-list" id="list-roma"></ul>
+        </section>
+
+        <section id="venedik" class="city-section">
+            <ul class="venue-list" id="list-venedik"></ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2026</p>
+        <span>HÜSEYİN ERDOĞAN</span>
+    </footer>
+
+    <script>
+        const cityData = {
+            floransa: [
+                {
+                    name: "Floransa",
+                    img: ["images/firenze.JPG", "images/firenze2.JPG"],
+                    desc: "Floransa her ne kadar güvenli görünse de, özellikle turist yoğunluğunun tavan yaptığı Santa Maria Novella Tren İstasyonu, Ponte Vecchio ve Mercato Centrale çevresinde borseggiattrici (kadın yankesiciler) ve hırsızlara karşı çok dikkatli olmalısınız. Genellikle kalabalık anlarda, bebek pusetiyle gezen veya turist kılığında dolaşan gruplar halinde hareket ederler. \"Dikkat dağıtma\" yöntemini çok iyi kullanırlar; üzerinize bir şey dökülmüş gibi yapabilir veya harita sorarak ilginizi başka yöne çekebilirler.",
+                    links: []
+                },
+                {
+                    name: "Trattoria Dall'Oste",
+                    img: ["images/firenzeoste.png", "images/firenzeoste2.jpg"],
+                    desc: "Floransa'nın dünya çapında ün salmış Floransa Bifteği (Bistecca alla Fiorentina) konusunda en popüler restoranlardan biridir. Şehrin farklı noktalarında şubeleri bulunsa da, klasik Toskana mutfağının rustik havasını modern bir hizmet anlayışıyla harmanlar. Özellikle etin kalitesi, dinlendirilme süreci ve farklı sığır cinslerine (Chianina gibi) göre sundukları geniş seçki ile et severler için bir mabet niteliğindedir. Rezervasyon yaptırmadan gitmek, kapıdaki kuyruklar nedeniyle oldukça zordur.",
+                    meta: "📍 Via Luigi Alamanni, 3/5r, 50123 Firenze FI",
+                    links: [
+                        { "label": "Google Maps", "url": "https://maps.app.goo.gl/Qp4w4XJSjYcibPgL6" },
+                        { "label": "Menü", "url": "https://trattoriadalloste.com/wp-content/uploads/2025/06/OSTE-MENU-noprezzi-ITA-Maggio2025.pdf" }
+                    ]
+                },
+                {
+                    name: "Il Cernacchio",
+                    img: ["images/firenzecernacchio.JPG", "images/firenzecernacchio2.JPG"],
+                    desc: "Piazza della Signoria'ya sadece birkaç adım mesafede yer alan bu küçük dükkan Floransa'ya resmen seyahat etme sebebim. Floransa mutfağının en köklü ve en delikanlı sokak lezzeti olan Lampredotto'yu burada deneyebilirsiniz. Bu geleneksel işkembe yemeğini (sığırın dördüncü midesi) modern bir sunumla ama aslına sadık kalarak hazırlar. Saatlerce sebzeli bir bulyonda ağır ağır pişirilen bu et, yumuşacık dokusuyla Floransa işçi sınıfının favori yemeğidir. Yanında ev yapımı yeşil sos (salsa verde) ve acı sos (salsa piccante) ile servis edilir. Ayrıca yanına eşlikçi olacak en ikonik detay, fiyasko. Masanızda duran hasır kaplı Fiasco şarabıdır, bizim dilimizdeki olumsuz anlamının aksine, Toskana'nın yüzyıllardır kullandığı geleneksel şarap şişesini temsil eder. ",
+                    meta: "📍 Via della Condotta, 38R, 50122 Firenze FI",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/P6Y2tY9L6A2A" }
+                    ]
+                },
+                {
+                    name: "Il Mercato Centrale Firenze",
+                    img: "images/firenzemercato.jpg",
+                    desc: "Floransa'nın tarihi San Lorenzo pazarının üst katında yer alan bu modern gastronomi merkezi, şehrin kalbinde her türlü İtalyan lezzetini tek çatı altında toplar. 1874'ten kalma tarihi demir ve cam mimarisinin altında, modern bir yemek kültürü deneyimi sunar. Burası 'açık mutfak' konseptiyle çalışır; el yapımı makarnalardan Toskana'nın ünlü Bistecca alla Fiorentina etine, taze pizzalardan deniz ürünlerine kadar geniş bir yelpaze sunar. Akşamüstü saatlerinde başlayan İtalyan klasiği Aperitivo için de oldukça popüler bir duraktır. Merkezi bardan alacağınız bir Spritz veya yerel bir kadeh Toskana şarabının yanında, pazarın gurme şarküteri reyonlarından seçebileceğiniz kaliteli peynirler, trüf mantarlı bruschettalar ve taze atıştırmalıklarla İtalyan akşam keyfini yerel halkla iç içe deneyimleyebilirsiniz.",
+                    meta: "📍 Piazza del Mercato Centrale, Via dell'Ariento, 50123 Firenze FI",
+                    links: [
+                        { "label": "Google Maps", "url": "https://maps.app.goo.gl/WkURH5BTWhZ1eYCY6" }
+                    ]
+                }
+            ],
+            roma: [
+                {
+                    name: "Jerry Thomas Speakeasy",
+                    img: ["images/romaterry.JPG", "images/romaterry2.JPG"],
+                    desc: "İtalya'nın ilk gizli barı (speakeasy) olarak 2010 yılında açılan mekan, adını modern barmenliğin babası kabul edilen Amerikalı Jerry Thomas'tan almıştır. İçeri girmek için gizli bir parolaya ve rezervasyona ihtiyaç duyulan bu bar, misafirlerini doğrudan 1920'lerin Yasaklılık Dönemi atmosferine götürür. İçerideki loş ışıklar, vintage mobilyalar ve döneme uygun müzikler, ziyaretçilere tarihin içinde gizli bir kaçamak sunar. Viski veya cin bazlı özel imza karışımları denemenizi tavsiye ederim.",
+                    meta: "❗️Kapıdaki parolayı web sitelerindeki küçük bir testi çözerek almanız gerekiyor.",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/P6Y2tY9L6A2A" },
+                        { label: "Bar Website", url: "https://www.thejerrythomasproject.it/" }
+                    ]
+                },
+                {
+                    name: "The Sanctuary Eco Retreat",
+                    img: ["images/romasanctuary.JPG", "images/romasanctuary2.JPG"],
+                    desc: "Roma Termini tren istasyonuna yakın bir bölgede, antik bir manastırın kalıntıları üzerine inşa edilen bu mekan, şehrin gürültüsünden uzak nezih bir yerde. Kolezyum’un çok yakınında, Parco del Colle Oppio içinden de yürüyerek gidebilirsiniz. Hafif etnik müzikler eşliğinde sunulan imza kokteyllerini denemenizi, yemek olarak ise taze deniz ürünleri seçeneklerine yönelmenizi tavsiye ederim.",
+                    meta: "📍 Via delle Terme di Traiano, 4A, 00184 Roma RM",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/gQHiU5NSLr1iAh3v7" },
+                        { label: "Restoran Website", url: "http://www.thesanctuaryecoretreat.com/" }
+                    ]
+                },
+                {
+                    name: "Ristorante M. Agrippa",
+                    img: "images/romamagrippa.jpg",
+                    desc: "Restoran, adını Pantheon’un ilk inşasını MÖ 27-25 yılları arasında başlatan İmparator Augustus’un damadı ve ünlü devlet adamı Marcus Agrippa’dan almaktadır. Burada yemek tercihinizi pizza ve bir şişe kırmızı şaraptan yana kullanmanızı tavsiye ederim, tatlıların güzel olduğunu hatırlıyorum. Bu meydanda yemek yerken genellikle gözünüze çarpacak olan, Pantheon'un alınlığındaki o meşhur Latince yazı; \"M(arcus). AGRIPPA L(uci). F(ilius). CO(n)S(ul). TERTIUM FECIT\", bu da \"Lucius'un oğlu Marcus Agrippa, üçüncü kez konsül olduğu zaman bu yapıyı inşa ettirdi\" anlamına gelir ve yapının orijinal inşaatçısı olduğunu belirtir.",
+                    meta: "📍Piazza della Rotonda, 67, 00100 Roma RM",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/Q7h9yVaYEcg9aj5v5" }
+                    ]
+                },
+                {
+                    name: "Dar Filettaro a Santa Barbara",
+                    img: "images/romafilettaro.png",
+                    desc: "1950'lerden beri hizmet veren bu mekan, ismini hemen yanındaki küçük Santa Barbara kilisesinden alır. Esnaf lokantası ortamında küçük bir meydana bakar, hava güzelse dışarıda oturmayı tavsiye ederim. Mekanın mutlaka denenmesi gereken imza yemeği, özel bir hamurla panelenip kızartılan morina balığı filetosudur (Filetto di Baccalà), ve yanında hamsili, sarımsaklı sosla hazırlanan hindiba yapraklarından oluşan Puntarelle Salatası (Insalata di Puntarelle). Kendi ev yapımı şaraplarını tavsiye etmiyorum.",
+                    meta: "📍 Largo dei Librari, 88, 00186 Roma RM",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/BfdmNd9DLBj82wdAA" }
+                    ]
+                }
+            ],
+            venedik: [
+                {
+                    name: "Venedik",
+                    img: "images/venezia.jpg",
+                    desc: "Kanalları, labirent sokakları ve tarihi dokusuyla dünyanın tek örneği bir şehir olan Venedik, resmen bir açık hava müzesidir. Venedik mutfak kültürünün kalbinde Bacaro adı verilen geleneksel şarap barları yer alır. Bu mekanlarda, bir kadeh yerel şarap (ombra) eşliğinde cicchetti adı verilen Venedik tarzı tapasların tadına bakılır. Bacaro kültürü, sadece yemek yemek değil, yerel halkla sosyalleşmek için güzel bir fırsat. Bu labirent gibi şehirde kaybolmak kaçınılmaz.. bu yüzden kaybolmaya izin verin ve ara sokakları keşfedin; çünkü Venedik'te doğru bir konum bilgisi, sizi sıradan bir turistik restorandan kurtarıp gerçek bir Venedikli gibi yaşatacak gizli bir avluya götürebilir.",
+                    meta: "📍 Venedik Şehir Merkezi",
+                    links: []
+                },
+                {
+                    name: "Bacareto da Lele",
+                    img: ["images/venezialele.png", "images/venezialele2.png"],
+                    desc: "Venedik'in Santa Croce bölgesinde, tren istasyonuna kısa bir yürüyüş mesafesinde yer alan bu minicik mekan, şehrin en ikonik ve otantik bacarolarından biridir. 1968'den beri hizmet veren Da Lele, hem yerel halkın hem de öğrencilerin uğrak noktasıdır. İçeride oturma alanı bulunmadığı için herkes elinde şarabı ve atıştırmalıklarıyla kapının önündeki meydanda veya yakındaki kilisenin basamaklarında sosyalleşir.",
+                    meta: "📍 Fondamenta dei Tolentini, 183, 30100 Venezia VE",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/rweNUiK6MGGeqiL58" }
+                    ]
+                },
+                {
+                    name: "Bacaro al Ravano",
+                    img: ["images/veneziabacaroravano3.png", "images/veneziabacaroravano.JPG", "images/veneziabacaroravano2.JPG"],
+                    layout: "triple",
+                    desc: "Rialto Köprüsü'nün kalabalığından sadece birkaç adım uzaklıkta, gizli bir sokakta yer alan bu mekanda, morina balığı ezmesi (Baccalà Mantecato) ve taze deniz mahsullü atıştırmalıkları mutlaka denenmelidir.",
+                    meta: "📍 Ruga Vecchia S. Giovanni, 1170, 30125 Venezia VE",
+                    links: [
+                        { label: "Google Maps", url: "https://maps.app.goo.gl/s8FMvs5TWxyVJss37" }
+                    ]
+                }
+            ]
+        };
+
+        function renderData() {
+            Object.keys(cityData).forEach(city => {
+                const list = document.getElementById(`list-${city}`);
+                if (list) {
+                    list.innerHTML = '';
+                    cityData[city].forEach(item => {
+                        const li = document.createElement('li');
+                        li.className = 'venue-item';
+                        
+                        let imgHtml = '';
+                        // Triple Layout: Üstte 1 geniş, altta 2 dikey resim
+                        if (item.layout === "triple" && Array.isArray(item.img) && item.img.length === 3) {
+                            imgHtml = `
+                                <div class="triple-image-layout">
+                                    <img src="${item.img[0]}" class="triple-image-top" onerror="this.src='https://via.placeholder.com/1000x560?text=Gorsel+Bulunamadi+1'">
+                                    <div class="triple-image-bottom">
+                                        <img src="${item.img[1]}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Bulunamadi+2'">
+                                        <img src="${item.img[2]}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Bulunamadi+3'">
+                                    </div>
+                                </div>`;
+                        } else if (Array.isArray(item.img)) {
+                            if (item.img.length >= 2) {
+                                imgHtml = `<div class="dual-image-container">
+                                    <img src="${item.img[0]}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">
+                                    <img src="${item.img[1]}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">
+                                </div>`;
+                            } else if (item.img.length === 1) {
+                                imgHtml = `<img src="${item.img[0]}" class="venue-image" onerror="this.src='https://via.placeholder.com/800x450?text=Gorsel+Yok'">`;
+                            }
+                        } else if (item.img) {
+                            imgHtml = `<img src="${item.img}" class="venue-image" onerror="this.src='https://via.placeholder.com/800x450?text=Gorsel+Yok'">`;
+                        }
+                        
+                        let linksHtml = '';
+                        if (item.links && item.links.length > 0) {
+                            linksHtml = item.links.map(link => 
+                                `<a href="${link.url}" target="_blank" class="custom-link">${link.label}</a>`
+                            ).join('<span class="link-separator">, </span>');
+                        }
+
+                        li.innerHTML = `
+                            ${imgHtml}
+                            <span class="venue-name">${item.name}</span>
+                            <span class="venue-description">${item.desc}</span>
+                            <span class="venue-meta">${item.meta || ''}</span>
+                            <div class="links-container">${linksHtml}</div>
+                        `;
+                        list.appendChild(li);
+                    });
+                }
+            });
+        }
+
+        function showCity(cityId) {
+            document.querySelectorAll('.city-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(cityId).classList.add('active');
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+            document.getElementById('link-' + cityId).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.onload = () => {
+            renderData();
+            showCity('venedik');
+        };
+    </script>
+</body>
+</html>
