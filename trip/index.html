@@ -362,8 +362,8 @@
             .dual-image-container, .triple-image-bottom { flex-direction: column; gap: 15px; }
             .dual-image-container img, .triple-image-bottom img { width: 100%; }
             .nav-links, .sub-nav-links { gap: 0.8rem; }
-            .nav-links a { font-size: 0.7rem; }
-            .sub-nav-links a { font-size: 0.65rem; }
+            .nav-links a { font-size: 1rem; }
+            .sub-nav-links a { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -861,40 +861,47 @@
         }
 
         function updateMenuUI() {
-    // 1. Şehir Menüsü Odaklama
+    // 1. Ana Menü: Seçili şehri parlat, diğerlerini silikleştir
     document.querySelectorAll('.nav-links a').forEach(link => {
         if (link.id === 'link-' + currentCity) {
             link.classList.add('active');
-            link.style.opacity = '1'; // Seçili olan tam parlak
+            link.style.opacity = '1';
+            link.style.transform = 'scale(1.05)'; // Seçili olanı hafifçe büyütür
         } else {
             link.classList.remove('active');
-            link.style.opacity = '0.3'; // Seçili olmayanlar silik
+            link.style.opacity = '0.35'; // Odak dışı şehirler
+            link.style.transform = 'scale(1)';
         }
     });
 
-    // 2. Alt Menü (Kategori) Kontrolü
     const subNav = document.querySelector('.sub-nav-links');
     
+    // 2. NOT Menüsü Seçiliyse Alt Menüyü Pasif Yap
     if (currentCity === 'not') {
-        // NOT seçiliyken alt menüyü tamamen kapat ve silikleştir
-        subNav.style.opacity = '0.2';
+        subNav.style.opacity = '0.35';
         subNav.style.pointerEvents = 'none';
-        document.querySelectorAll('.sub-nav-links a').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.sub-nav-links a').forEach(l => {
+            l.classList.remove('active');
+            l.style.opacity = '1';
+        });
     } else {
-        // Şehir seçiliyken alt menüyü aç
+        // 3. Şehir Seçiliyse Alt Menü Odaklaması
         subNav.style.opacity = '1';
         subNav.style.pointerEvents = 'auto';
         
-        // Kategori butonlarını odakla (Seçili olan parlak, diğerleri silik)
         document.querySelectorAll('.sub-nav-links a').forEach(link => {
-            if (link.id === 'sub-' + currentCategory && currentCategory !== 'home') {
-                link.classList.add('active');
-                link.style.opacity = '1';
+            if (currentCategory !== 'home') {
+                if (link.id === 'sub-' + currentCategory) {
+                    link.classList.add('active');
+                    link.style.opacity = '1';
+                } else {
+                    link.classList.remove('active');
+                    link.style.opacity = '0.3'; // Diğer kategorileri söndürür
+                }
             } else {
+                // Şehir anasayfasındayken kategorilerin hepsi net görünsün
                 link.classList.remove('active');
-                // Eğer bir kategori seçiliyse diğerlerini silikleştir, 
-                // ama anasayfadaysan (hiçbiri seçili değilse) hepsi normal görünsün
-                link.style.opacity = (currentCategory === 'home') ? '1' : '0.4';
+                link.style.opacity = '1';
             }
         });
     }
