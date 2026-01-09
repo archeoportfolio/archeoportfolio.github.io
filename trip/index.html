@@ -167,7 +167,6 @@
             display: block;
             margin-bottom: 0.5rem;
             text-align: left;
-            text-transform: uppercase;
         }
 
         .venue-image {
@@ -242,6 +241,8 @@
             text-align: left;
         }
 
+        /* Drop cap (ilk harfi büyütme) efekti kaldırıldı */
+
         .venue-meta {
             font-size: 0.95rem;
             color: #555555;
@@ -297,6 +298,43 @@
             opacity: 0.8;
         }
 
+        /* Yan yana yerleşim (Resim + Yazı) */
+        .side-by-side-container {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            width: calc(100% + 200px);
+            max-width: 1000px;
+            margin-left: -100px;
+            margin-bottom: 2rem;
+        }
+
+        .side-by-side-img {
+            width: 45%;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            border-radius: 2px;
+            background: #f9f9f9;
+        }
+
+        .side-by-side-content {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 1000px) {
+            .side-by-side-container {
+                width: 100%;
+                margin-left: 0;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .side-by-side-img, .side-by-side-content {
+                width: 100%;
+            }
+        }
+
         /* Responsive */
         @media (min-width: 1001px) {
             .venue-name, .venue-description, .venue-meta, .links-container {
@@ -339,7 +377,7 @@
         </ul>
         <ul class="sub-nav-links">
             <li><a onclick="setCategory('muze')" id="sub-muze">MÜZE</a></li>
-            <li><a onclick="setCategory('yemek')" id="sub-yemek">YEME-İÇME</a></li>
+            <li><a onclick="setCategory('yemek')" id="sub-yemek">Mutfak</a></li>
             <li><a onclick="setCategory('otel')" id="sub-otel">OTEL</a></li>
         </ul>
     </nav>
@@ -356,10 +394,18 @@
 
     <script>
         let currentCity = 'floransa';
-        let currentCategory = 'muze';
+        let currentCategory = 'home';
 
         const cityData = {
             floransa: {
+                home: [
+                    {
+                        name: "",
+                        img: "images/firenze.png",
+                        desc: "Floransa her ne kadar güvenli görünse de, özellikle turist yoğunluğunun tavan yaptığı Santa Maria Novella Tren İstasyonu, Ponte Vecchio ve Mercato Centrale çevresindeki hırsızlara karşı çok dikkatli olmalısınız. Genellikle kalabalık anlarda, bebek pusetiyle gezen veya turist kılığında dolaşan gruplar halinde hareket ederler. \"Dikkat dağıtma\" yöntemini çok iyi kullanırlar; üzerinize bir şey dökülmüş gibi yapabilir veya harita sorarak ilginizi başka yöne çekebilirler.",
+                        links: []
+                    }
+                ],
                 muze: [
                     {
                         name: "❶ Galleria degli Uffizi",
@@ -385,19 +431,13 @@
                         name: "❸ Piazzale Michelangelo",
                         img: "images/firenzepiazzalem.jpg",
                         desc: "Özellikle gün batımında şehrin o meşhur kiremit çatılarını ve Arno Nehri’ni izlemek için eşsiz bir noktadır. Şehri panoramik bir açıdan görüp kartpostallık fotoğraflar çekebileceğiniz bu terasa mutlaka çıkmanızı ve gün batımını izlemenizi tavsiye ederim.",
-                        meta: "❗️Gitmeden önce yeme-içme tavsiyem olan Il Tempio kiosk barında Arno Nehri'ne karşı aperitif atıştırmalık yapabilirsiniz.",
+                        meta: "❗️Gitmeden önce ❹ numaralı yeme-içme tavsiyem olan Il Tempio kiosk barında Arno Nehri'ne karşı aperitif atıştırmalık yapabilirsiniz.",
                         links: [
                             { label: "Google Maps", url: "https://maps.app.goo.gl/VzdcukZgvz7p4tVX8" }
                         ]
                     }
                 ],
                 yemek: [
-                    {
-                        name: "",
-                        img: "images/firenze.png",
-                        desc: "Floransa her ne kadar güvenli görünse de, özellikle turist yoğunluğunun tavan yaptığı Santa Maria Novella Tren İstasyonu, Ponte Vecchio ve Mercato Centrale çevresindeki hırsızlara karşı çok dikkatli olmalısınız. Genellikle kalabalık anlarda, bebek pusetiyle gezen veya turist kılığında dolaşan gruplar halinde hareket ederler. \"Dikkat dağıtma\" yöntemini çok iyi kullanırlar; üzerinize bir şey dökülmüş gibi yapabilir veya harita sorarak ilginizi başka yöne çekebilirler.",
-                        links: []
-                    },
                     {
                         name: "❶ Trattoria Dall'Oste",
                         img: ["images/firenzeoste.png", "images/firenzeoste2.png"],
@@ -420,7 +460,7 @@
                     {
                         name: "❸ Il Mercato Centrale Firenze",
                         img: "images/firenzemercato.jpg",
-                        desc: "Floransa'nın tarihi San Lorenzo pazarının üst katında yer alan bu modern gastronomi merkezi, şehrin kalbinde her türlü İtalyan lezzetini tek çatı altında toplar. 1874'ten kalma tarihi demir ve glass mimarisinin altında, modern bir yemek kültürü deneyimi sunar. Burası 'açık mutfak' konseptiyle çalışır; el yapımı makarnalardan Toskana'nın ünlü Bistecca alla Fiorentina etine, taze pizzalardan deniz ürünlerine kadar geniş bir yelpaze sunar. Akşamüstü saatlerinde başlayan İtalyan klasiği Aperitivo için de oldukça popüler bir duraktır. Merkezi bardan alacağınız bir Spritz veya yerel bir kadeh Toskana şarabının yanında, pazarın gurme şarküteri reyonlarından seçebileceğiniz kaliteli peynirler, trüf mantarlı bruschettalar ve taze atıştırmalıklarla İtalyan akşam keyfini yerel halkla iç içe deneyimleyebilirsiniz.",
+                        desc: "Floransa'nın tarihi San Lorenzo pazarının üst katında yer alan bu modern gastronomi merkezi, şehrin kalbinde her türlü İtalyan lezzetini tek çatı altında toplar. 1874'ten kalma tarihi demir ve glass mimarisinin altında, modern bir yemek kültürü deneyimi suner. Burası 'açık mutfak' konseptiyle çalışır; el yapımı makarnalardan Toskana'nın ünlü Bistecca alla Fiorentina etine, taze pizzalardan deniz ürünlerine kadar geniş bir yelpaze sunar. Akşamüstü saatlerinde başlayan İtalyan klasiği Aperitivo için de oldukça popüler bir duraktır. Merkezi bardan alacağınız bir Spritz veya yerel bir kadeh Toskana şarabının yanında, pazarın gurme şarküteri reyonlarından seçebileceğiniz kaliteli peynirler, trüf mantarlı bruschettalar ve taze atıştırmalıklarla İtalyan akşam keyfini yerel halkla iç içe deneyimleyebilirsiniz.",
                         meta: "📍 Piazza del Mercato Centrale, Via dell'Ariento, 50123 Firenze FI",
                         links: [
                             { "label": "Google Maps", "url": "https://maps.app.goo.gl/WkURH5BTWhZ1eYCY6" }
@@ -435,20 +475,83 @@
                             { label: "Google Maps", url: "https://maps.app.goo.gl/7NouMpmQ6YuzKL389" },
                             { label: "Bar Website", url: "https://www.chioscoiltempio.com/" }
                         ]
+                    },
+                    {
+                        name: "❺ Caffè Gilli",
+                        img: ["images/firenzegilli.JPG", "images/firenzegilli2.JPG"],
+                        desc: "1733 yılından beri hizmet veren Caffè Gilli, Floransa’nın en eski ve en prestijli pastanesi olarak misafirlerini büyüleyici bir Belle Époque atmosferinde ağırlamaktadır. Piazza della Repubblica’ya bakan bu tarihi mekandaki hazır poşet çaylar, demlenmiş çaylarımız kadar iddialı. Her çeşit tatlısını denemenizi mutlaka tavsiye ederim.",
+                        meta: "📍 Via Roma, 1r, 50123 Firenze FI",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/P3n5nFJj42UaZfNZ9" }
+                        ]
+                    },
+                    {
+                        name: "❻ All’Antico Vinaio",
+                        img: "images/firenzevinaio.jpg",
+                        desc: "Floransa'nın simgesi haline gelen All'Antico Vinaio, taze schiacciata ekmeğiyle hazırlanan efsanevi sandviçleriyle dünya çapında bir üne sahiptir. Önündeki uzun kuyruklara rağmen, o muazzam yerel malzemelerin birleşimiyle gerçek bir Toskana lezzet şöleni yaşamak için kesinlikle beklemeye değer. Sandviçlerin sırrı, onlara karakteristik yumuşaklığı ve derinliği katan ev yapımı yoğun kremalarında gizlidir. Özellikle fıstık kreması, pecorino kreması ve trüf mantarı kreması mutlaka denemeniz gereken imza dokunuşlardır.",
+                        meta: "📍 Via dei Neri, 65r, 50122 Firenze FI",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/2sTosrcFZyZxBKgw7" }
+                        ]
                     }
                 ],
-                otel: []
+                otel: [
+                    {
+                        name: "❶ Relais Hotel Centrale \"Dimora Storica\"",
+                        img: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/595645311.jpg?k=1ccc9c9f0e891d1007952787d9202f45799a34e988987ca28d1c3301dce83337&o=",
+                        desc: "Bizzat konakladığım, şehrin merkezinde fakat gürültüsünden uzak ortalama seviyede güzel bir otel. Kahvaltı seçeneği oldukça zengin, Floransa için bu oteli önerebilirim.",
+                        meta: "📍 Via dei Conti, 3, 50100 Firenze FI",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/jJscXSnk4JfuEzeq5" },
+                            { label: "Booking", url: "https://www.booking.com/hotel/it/hotelcentrale.it.html" }
+                        ]
+                    },
+                    {
+                        name: "❷ Hotel Croce Di Malta",
+                        img: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/495546916.jpg?k=94576bb48689bc762605a2b3861cda3979478976deafb4fe0dde3cd00145b9b3&o=",
+                        desc: "Santa Maria Novella tren istasyonuna çok yakın olan güzel görünen bir otel.",
+                        meta: "📍 Via della Scala, 7, 50123 Firenze FI",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/1G56djfMyYB1TZXa6" },
+                            { label: "Booking", url: "https://www.booking.com/hotel/it/hotelcrocedimalta" }
+                        ]
+                    }
+                ]
             },
             roma: {
-                muze: [],
-                yemek: [
+                home: [
                     {
                         img: "images/roma.png",
                         name: "",
                         desc: "Roma devasa bir açık hava müzesi gibidir. Ancak bu büyüleyici atmosferin yanında, özellikle Termini İstasyonu, Kolezyum çevresi ve Trevi Çeşmesi gibi turistlerin en yoğun olduğu bölgelerde yankesicilik olaylarına karşı ekstra tetikte olmalısınız. Şehri keşfederken Nasoni adı verilen ve yüzyıllardır akan tarihi döküm çeşmelerden su içmek bir Roma klasiğidir. Unutmayın, Roma'da bir sokak tabelasına bakmak bile sizi binlerce yıllık bir imparatorluk kalıntısıyla karşı karşıya getirebilir, bu yüzden sadece ana caddelerde kalmayıp Trastevere'nin dar ve sarmaşıklarla kaplı sokaklarında kaybolmayı ihmal etmeyin.",
                         meta: "",
                         links: []
+                    }
+                ],
+                muze: [
+                    {
+                        name: "❶ Musei Vaticani",
+                        img: ["images/romamuseivaticani.jpg", "images/romamuseivaticani2.JPG", "images/romamuseivaticani3.JPG"],
+                        layout: "triple",
+                        desc: "Roma'nın ve dünyanın en görkemli sanat koleksiyonlarından birine sahip olan Vatikan Müzeleri, binlerce yıllık bir tarihi içerisinde barındırmaktadır. Ünlü Atina Okulu freskinden antik heykellere ve Raphael Odaları'na uzanan bu eşsiz koridorları keşfetmek için gününüzün büyük bir kısmını buraya ayırmanızı, turunuzu ise büyüleyici Sistine Şapeli ve ardından San Pietro Bazilikası ile taçlandırmanızı tavsiye ederim.",
+                        meta: "❗️Kalabalığa dikkat edin, yine bu büyük ve her zaman yoğun talep olan müzeye sıra beklemeden bilet almanızı tavsiye ederim.",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/WVjAMYgDSdit9jQb6" },
+                            { label: "Müze Bilet Sitesi", url: "https://tickets.museivaticani.va/home" }
+                        ]
                     },
+                    {
+                        name: "❷ Kolezyum",
+                        img: "images/romacolosseo.jpg",
+                        desc: "Roma'nın en ikonik yapısı olan Colosseo, antik Roma’daki gladyatör dövüşlerine ve büyük halk gösterilerine ev sahipliği yapmış devasa bir amfitiyatrodur. Burayı ziyaret ederken biletinizi mutlaka haftalar öncesinden online olarak almalı ve yapının hemen yanındaki Roma Forumu ile Palatino Tepesi’ni de kapsayan kombine bilet seçeneklerini değerlendirmelisiniz. Ancak bunun için yaklaşık 2-5 saatlik bir müze turu yapacağınızı da unutmayın.",
+                        meta: "❗️Sıcak havalarda mutlaka güneş kremi gibi hazırlıklarınızı yapmayı tavsiye ederim. Roma şehrinde güneşten etkilenmeniz çok yüksek ihtimal.",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/rxHVVQkrad5rT9Sv6" },
+                            { label: "Müze Bilet Sitesi", url: "https://colosseo.it/en/tickets/24h-colosseum-roman-forum-and-palatine/" }
+                        ]
+                    }
+                ],
+                yemek: [
                     {
                         name: "❶ Jerry Thomas Speakeasy",
                         img: ["images/romaterry.JPG", "images/romaterry2.JPG"],
@@ -488,17 +591,61 @@
                         ]
                     }
                 ],
-                otel: []
+                otel: [
+                    {
+                        name: "❶ Hotel Doria",
+                        img: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/335504329.jpg?k=9e31d26d3ea7b4aadd9a01d2d89af24f60526de57b0cb6b128e242e32fab0614&o=",
+                        desc: "Son zamanlarda her Roma'ya gittiğimde konakladığım bir otel, odaları gerçekten temiz ve çalışanlar güler yüzlü, her zaman müsait. Otel bölgesi Roma Termini tren istasyonuna çok yakın bir konumda. Kahvaltısı oldukça dolgun ve çeşitli. Tavsiye ederim.",
+                        meta: "📍 Bu konum taksi kullanımı için de oldukça uygundur. Roma şehrinde rahatlıkla UBER kullanabilirsiniz.",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/gaQNwNU7xd6aqhzVA" },
+                            { label: "Booking", url: "https://www.booking.com/hotel/it/hoteldoriaroma" }
+                        ]
+                    },
+                    {
+                        name: "❷ Palazzo De Cupis",
+                        img: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/38904349.jpg?k=2002863a348cacc6fea3a5b0b82a2755b2c74189d220992bafa82cdd456faac7&o=",
+                        desc: "Bu oteli deneyimlerim arasında değil, ancak şehirde konaklamak için fikir verebilecek merkezi bir noktada. Navona meydanına bakan odalara bile sahip olan bu otelin şaşırtıcı derecede makul fiyatlara sahip olduğunu görüyorum. Kahvaltısının bol ve iyi olduğuna dair yorumlar okuyorum. Değerlendirilebilir.",
+                        meta: "📍 Via di Santa Maria dell'Anima, 10, 00186 Roma RM",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/bRs1QCCnGk8Ze3SZA" },
+                            { label: "Booking", url: "https://www.booking.com/hotel/it/palazzo-de-cupis-suites-and-view" }
+                        ]
+                    }
+                ]
             },
             venedik: {
-                muze: [],
-                yemek: [
+                home: [
                     {
                         name: "",
                         img: "images/venezia.png",
                         desc: "Kanalları, labirent sokakları ve tarihi dokusuyla dünyanın tek örneği bir şehir olan Venedik, resmen bir açık hava müzesidir. Venedik mutfak kültürünün kalbinde Bacaro adı verilen geleneksel şarap barları yer alır. Bu mekanlarda, bir kadeh yerel şarap (ombra) eşliğinde cicchetti adı verilen Venedik tarzı tapasların tadına bakılır. Bacaro kültürü, sadece yemek yemek değil, yerel halkla sosyalleşmek için güzel bir fırsat. Bu labirent gibi şehirde kaybolmak kaçınılmaz.. bu yüzden kaybolmaya izin verin ve ara sokakları keşfedin; çünkü Venedik'te doğru bir konum bilgisi, sizi sıradan bir turistik restorandan kurtarıp gerçek bir Venedikli gibi yaşatacak gizli bir avluya götürebilir.",
                         links: []
+                    }
+                ],
+                muze: [
+                    {
+                        name: "❶ Scuola Grande di San Rocco",
+                        img: ["images/veneziascuolagrande.JPG", "images/veneziascuolagrande2.JPG"],
+                        desc: "Venedik'in en özel duraklarından biri olan bu yapı, ünlü ressam Tintoretto'nun devasa ve büyüleyici tablolarıyla süslenmiş tavan ve duvarlarıyla adeta \"Tintoretto'nun Sistine Şapeli\" olarak anılır. Biletleri kapıdan rahatlıkla satın alabilirsiniz.",
+                        meta: "❗️Bu görkemli salonda tavanlardaki detayları boynunuzu yormadan rahatlıkla inceleyebilmeniz için salonun sol kısmında masaya bırakılmış el aynalarıyla inceleyin.",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/unVCnh3j2zqzhS7y9" }
+                        ]
                     },
+                    {
+                        name: "❷ Basilica San Marco",
+                        img: ["images/veneziabasilica.JPG", "images/veneziabasilica2.JPG", "images/veneziabasilica3.JPG"],
+                        layout: "triple",
+                        desc: "Venedik'in kalbi San Marco Meydanı'nda yer alan bu bazilika, altın varaklı göz alıcı mozaikleri ve Bizans mimarisinin eşsiz detaylarıyla \"Altın Kilise\" olarak bilinir. Şehrin zenginliğini ve gücünü yansıtan bu tarihi yapıda, özellikle Pala d'Oro (Altın Sunak) ve teras katından izleyebileceğiniz meydan manzarası kesinlikle görülmeye değerdir.",
+                        meta: "❗️Bazilika’nın dış cephesinde göreceğiniz dört görkemli at heykeli, aslında 1204 yılındaki 4. Haçlı Seferi sırasında İstanbul Hipodromu’ndan ganimet olarak getirilmiş tarihi hazinelerdir. Dışarıdakiler hava koşullarından korunması için yerleştirilen kopyalardır; bu paha biçilemez antik eserlerin orijinallerini ise yapının içerisindeki müze bölümünde yakından inceleyebilirsiniz.",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/YZd5NjuYUc4RuDy79" },
+                            { label: "Müze Bilet", url: "https://tickets.basilicasanmarco.it/en/store#/en/buy?skugroup_id=2524" }
+                        ]
+                    }
+                ],
+                yemek: [
                     {
                         name: "❶ Bacareto da Lele",
                         img: ["images/venezialele.png", "images/venezialele2.png"],
@@ -519,7 +666,27 @@
                         ]
                     }
                 ],
-                otel: []
+                otel: [
+                    {
+                        name: "❶ Staycity Aparthotels Venice Mestre",
+                        img: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/215332840.jpg?k=cc6f7a777527074f02b2cb308c4f8c8da0625922bbdc03a397a1c57bdbb1c62d&o=",
+                        desc: "Venedik'te konakladığım tek otel burada, Mestre bölgesindedir. Yani Venedik şehrinin İtalya anakarası üzerinde bulunur. Buradan Venedik Tronchetto, yani turistik bölgesine ulaşım oldukça kolaydır. Dolayısıyla böyle bir seçeneği de değerlendirmenizi tavsiye ederim.",
+                        meta: "Venezia Mestre ve Venezia Santa Lucia tren istasyonlarını kullanarak geceyarısına kadar olan tren seferleri ile sağlayabilirsiniz.",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/WwVuUPUoQrYDrP2e9" },
+                            { label: "Booking", url: "https://www.booking.com/hotel/it/staycity-aparthotels-venice-mestre" }
+                        ]
+                    },
+                    {
+                        name: "❷ Hotel Gardena Venice",
+                        img: "https://cf.bstatic.com/xdata/images/hotel/max1024x768/74966383.jpg?k=66b351733df2f1342a1641d4cc87319ed691e1dcd6443f2d8092548408dce11c&o=",
+                        desc: "Boooking sitesinden bu otel de tren istasyonuna yakınlığı sebebiyle oldukça makul fiyatlar gösteriyor.",
+                        meta: "📍 Fondamenta dei Tolentini, 239, 30135 Città Metropolitana di VE",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/2RjXcEyDUQgGiUEr9" }
+                        ]
+                    }
+                ]
             }
         };
 
@@ -535,9 +702,24 @@
             }
 
             data.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'venue-item';
-                
+            const li = document.createElement('li');
+            li.className = 'venue-item';
+            
+            // SADECE "home" kategorisi için yan yana yapı kullan
+            if (currentCategory === 'home') {
+                li.innerHTML = `
+                    <div class="side-by-side-container">
+                        <img src="${item.img}" class="side-by-side-img" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">
+                        <div class="side-by-side-content">
+                            ${item.name ? `<span class="venue-name" style="margin-left:0; width:100%;">${item.name}</span>` : ''}
+                            <span class="venue-description" style="margin-left:0; width:100%;">${item.desc}</span>
+                            <span class="venue-meta" style="margin-left:0; width:100%;">${item.meta || ''}</span>
+                        </div>
+                    </div>
+                `;
+            } 
+            // DİĞER KATEGORİLER (Müze, Yemek, Otel) için eski yapıyı koru
+            else {
                 let imgHtml = '';
                 if (item.layout === "triple" && Array.isArray(item.img) && item.img.length === 3) {
                     imgHtml = `
@@ -570,13 +752,14 @@
 
                 li.innerHTML = `
                     ${imgHtml}
-                    <span class="venue-name">${item.name}</span>
+                    ${item.name ? `<span class="venue-name">${item.name}</span>` : ''}
                     <span class="venue-description">${item.desc}</span>
                     <span class="venue-meta">${item.meta || ''}</span>
                     <div class="links-container">${linksHtml}</div>
                 `;
-                list.appendChild(li);
-            });
+            }
+            list.appendChild(li);
+        });
 
             const section = document.getElementById('content-section');
             section.classList.remove('active');
@@ -586,6 +769,7 @@
 
         function setCity(cityId) {
             currentCity = cityId;
+            currentCategory = 'home';
             updateMenuUI();
             renderCurrentData();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -603,7 +787,9 @@
             document.getElementById('link-' + currentCity).classList.add('active');
             
             document.querySelectorAll('.sub-nav-links a').forEach(l => l.classList.remove('active'));
-            document.getElementById('sub-' + currentCategory).classList.add('active');
+            if (currentCategory !== 'home') {
+                document.getElementById('sub-' + currentCategory).classList.add('active');
+            }
         }
 
         window.onload = () => {
