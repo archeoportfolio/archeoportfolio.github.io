@@ -818,6 +818,10 @@
         }
 
         function setCategory(catId) {
+            if (currentCity === 'not') {
+                return;
+            }
+            
             currentCategory = catId;
             updateMenuUI();
             renderCurrentData();
