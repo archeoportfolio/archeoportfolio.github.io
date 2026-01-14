@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>RTIViewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8" />
+
+    <!-- Dynamically set stylesheet via config -->
+    <link id="skinCssLink" rel="stylesheet" href="" />
+
+    <style>
+        html, body {
+            margin: 0px;
+            padding: 0px;
+            height: 100%;
+            overflow: hidden;
+        }
+        #openlime {
+            position:relative;
+            height: 100%
+        }
+    </style>
+</head>
+
+<body>
+    <div id="demo" class="openlime"></div>
+</body>
+
+<script>
+    const config = {
+        stylesheetUrl: 'skin.css',
+        openlimeUrl: 'openlime.min.js',
+        skinUrl: 'skin.svg',
+        rtiUrl: 'info.json',
+        rtiLabel: 'PTM-DeepZoom',
+        vectorUrl: 'vector.png',
+        vectorLabel: 'Vector On/Off'
+    };
+
+    document.getElementById('skinCssLink').href = config.stylesheetUrl;
+
+    const openlimeScript = document.createElement('script');
+    openlimeScript.src = config.openlimeUrl;
+    document.head.appendChild(openlimeScript);
+
+    openlimeScript.onload = function() {
+
+        async function autodetect() {
+            let response = await fetch('plane_0.tzi');
+            if(response.status == 200) return "tarzoom";
+            response = await fetch('plane_0.dzi');
+            if(response.status == 200) return "deepzoom";
+            response = await fetch('planes.tzi');
+            if(response.status == 200) return "itarzoom";
+            response = await fetch('plane_0.jpg');
+            if(response.status == 200) return "image";
+            alert("RTI could not be detected here");
+            return "";
+        }
+
+        async function autodetectNormals(layout) {
+            if(layout == 'tarzoom') {
+                let response = await fetch('normals.tzi');
+                if(response.status == 200) return true;
+            }
+            if(layout == 'deepzoom') {
+                let response = await fetch('normals.dzi');
+                if(response.status == 200) return true;
+            }
+            if(layout == 'image') {
+                let response = await fetch('normals.jpg');
+                if(response.status == 200) return true;
+            }
+            return false;
+        }
+
+        async function init() {
+            let layout = await autodetect();
+            let normals = await autodetectNormals(layout);
+            var lime = new OpenLIME.Viewer('#demo', { background:'black' });
+
+            let baseLayer = new OpenLIME.Layer({
+                layout: layout,
+                type:'rti',
+                url: config.rtiUrl,
+                normals: normals,
+                label: config.rtiLabel
+            });
+            lime.canvas.addLayer('RTI', baseLayer);
+
+            // Vector Layer
+            const vectorLayer = new OpenLIME.Layer({
+                type: 'image',
+                url: config.vectorUrl,
+                overlay: true,
+                visible: false,
+                label: config.vectorLabel
+            });
+            lime.canvas.addLayer('vector', vectorLayer);
+
+            let lensContentLayer = new OpenLIME.Layer({
+                layout: layout,
+                type:'rti',
+                url: config.rtiUrl,
+                normals: normals,
+                visible: false,
+                label: 'Lens'
+            });
+            lime.canvas.addLayer('RTI Normals', lensContentLayer);
+            
+            if (lensContentLayer.shader && lensContentLayer.shader.modes) {
+                lensContentLayer.setMode('normals');
+            }
+
+            const lensDashboard = new OpenLIME.LensDashboardNavigator(lime, {
+                borderColor: [0.078, 0.078, 0.078, 1],
+                borderWidth: 12,
+                containerSpace: 80
+            });
+
+            const lensLayer = new OpenLIME.Layer({
+                type: 'lens',
+                layers: [lensContentLayer],
+                camera: lime.camera,
+                radius: 200,
+                borderWidth: 0,
+                borderColor: [0, 0, 0, 0],
+                borderEnable: false,
+                dashboard: lensDashboard,
+                visible: false,
+                label: 'Lens On/Off'
+            });
+            lime.canvas.addLayer('lens', lensLayer);
+
+            const controllerLens = new OpenLIME.ControllerFocusContext({
+                lensLayer: lensLayer,
+                camera: lime.camera,
+                canvas: lime.canvas,
+                priority: -200,
+                enableDirectContextControl: true
+            });
+            lime.pointerManager.onEvent(controllerLens);
+            lensLayer.controllers.push(controllerLens);
+
+            OpenLIME.Skin.setUrl(config.skinUrl);
+            let ui = new OpenLIME.UIBasic(lime, { skin: config.skinUrl, showLightDirections: false });
+
+            // Hide all UI actions and controls
+            ui.actions.zoomin.display = false;
+            ui.actions.zoomout.display = false;
+            ui.actions.ruler.display = false;
+            ui.actions.rotate.display = false;
+            ui.actions.snapshot.display = false;
+            ui.actions.layers.display = false;
+            ui.actions.help.display = false;
+            if (ui.actions.home) ui.actions.home.display = false;
+            if (ui.actions.fullscreen) ui.actions.fullscreen.display = false;
+            // Enable light but hide its button and disable built-in click/drag control
+            ui.actions.light.active = true;
+            if (ui.actions.light) {
+                ui.actions.light.display = false;
+                ui.actions.light.mouseControl = false;
+            }
+
+            // Ensure camera limits remain sane
+            lime.camera.maxFixedZoom = 4;
+            window.lime = lime;
+
+            // Hide any remaining UI elements via CSS
+            const __hideUiStyle = document.createElement('style');
+            __hideUiStyle.innerHTML = `
+                .openlime-toolbar, .openlime-menu, .openlime-sidebar, .openlime-topbar, .openlime-footer, .openlime-controls, .openlime-menu-button, .openlime-panel { display:none !important; }
+                .openlime-lightdir { display:none !important; }
+            `;
+            document.head.appendChild(__hideUiStyle);
+
+            // Make the light follow mouse movement without clicking
+            const __container = lime.containerElement || document.getElementById('demo');
+            // Throttle updates with requestAnimationFrame to avoid flooding updates
+            let __pendingLightUpdate = false;
+            const __lightPos = { x: 0, y: 0 };
+            __container.addEventListener('mousemove', (ev) => {
+                const rect = __container.getBoundingClientRect();
+                const x = (ev.clientX - rect.left) / rect.width;
+                const y = (ev.clientY - rect.top) / rect.height;
+                const cx = Math.max(0, Math.min(1, x));
+                const cy = Math.max(0, Math.min(1, y));
+
+                // Map to controller coordinates: center at 0, range [-1,1], invert Y to match controller
+                const px = 2 * cx - 1;            // left -> -1, center -> 0, right -> +1
+                const py = 2 * (1 - cy) - 1;      // top -> +1, center -> 0, bottom -> -1
+
+                __lightPos.x = px;
+                __lightPos.y = py;
+
+                if (!__pendingLightUpdate) {
+                    __pendingLightUpdate = true;
+                    requestAnimationFrame(() => {
+                        __pendingLightUpdate = false;
+                        if (ui.lightcontroller && ui.lightcontroller.setPosition) {
+                            ui.lightcontroller.setPosition(__lightPos.x, __lightPos.y);
+                        } else if (ui.light && ui.lightcontroller && ui.lightcontroller.setPosition) {
+                            ui.lightcontroller.setPosition(__lightPos.x, __lightPos.y);
+                        }
+                    });
+                }
+            });
+
+            // Lens toggle is disabled
+            ui.actions.lenstoggle = {
+                title: 'Open/Close Lens (Magnifier)',
+                key: 'm',
+                display: false,
+                task: (event) => {
+                    lensLayer.setVisible(!lensLayer.visible);
+                    lensDashboard.container.style.display = lensLayer.visible ? 'block' : 'none';
+                }
+            };
+        }
+
+        init();
+    };
+</script>
+
+</html>
