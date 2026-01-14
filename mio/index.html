@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hüseyin Erdoğan | Akademik Portfolyo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #888888; 
+            --border-color: #eeeeee;
+            --accent-color: #000000;
+            --link-hover: #555555;
+            --font-family: 'Crimson Pro', 'Times New Roman', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; scroll-behavior: smooth; }
+        body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+        /* Sol Navigasyon */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 280px;
+            padding: 60px 40px;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            background: white;
+        }
+
+        .profile-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .profile-info p {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .nav-links { list-style: none; margin-top: 20px; }
+        .nav-links li { margin-bottom: 15px; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 18px;
+            font-weight: 400;
+            transition: all 0.3s ease;
+            display: block;
+            opacity: 0.5;
+        }
+
+        .nav-links a.active, .nav-links a:hover {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .social-links {
+            margin-top: auto;
+            padding-top: 20px;
+        }
+        .social-links a {
+            display: inline-block;
+            margin-right: 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .social-links a:hover { color: var(--accent-color); }
+
+        /* Ana İçerik */
+        main {
+            margin-left: 280px;
+            padding: 80px 10%;
+            max-width: 1200px;
+        }
+
+        section {
+            margin-bottom: 100px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s ease-out;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .bio-text {
+            font-size: 21px;
+            font-weight: 300;
+            color: #333;
+            max-width: 800px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .card {
+            padding: 20px;
+            border: 1px solid #f5f5f5;
+            transition: border-color 0.3s;
+        }
+        .card:hover { border-color: #ccc; }
+        .card h3 { font-size: 20px; margin-bottom: 10px; }
+        .card p { font-size: 16px; color: #666; }
+        .card .date { font-size: 13px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; display: block; }
+
+        .skills-tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .skill-tag {
+            padding: 5px 12px;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            font-size: 14px;
+            color: #555;
+            border-radius: 2px;
+        }
+
+        /* Mobil Uyumluluk */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 40px 20px;
+            }
+            main { margin-left: 0; padding: 40px 20px; }
+            .nav-links { display: flex; flex-wrap: wrap; gap: 15px; }
+            .nav-links li { margin-bottom: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="profile-info">
+            <h1>Hüseyin Erdoğan</h1>
+            <p>Arkeolog & Dijital Miras Uzmanı</p>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="#about" class="active" onclick="activateLink(this)">Hakkımda</a></li>
+            <li><a href="#projects" onclick="activateLink(this)">Projeler</a></li>
+            <li><a href="#experience" onclick="activateLink(this)">Deneyim</a></li>
+            <li><a href="#skills" onclick="activateLink(this)">Uzmanlık</a></li>
+            <li><a href="#contact" onclick="activateLink(this)">İletişim</a></li>
+        </ul>
+
+        <div class="social-links">
+            <a href="https://github.com" target="_blank">GitHub</a>
+            <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+            <a href="https://orcid.org" target="_blank">ORCID</a>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hakkımda -->
+        <section id="about" class="visible">
+            <h2>Hakkımda</h2>
+            <p class="bio-text">
+                Beşeri bilimler ile bilgisayar bilimlerinin kesişim noktasında çalışan bir arkeologum. 
+                Bologna Üniversitesi'ndeki yüksek lisans sürecimde, tarihsel verinin eleştirel analizi ile ileri teknolojileri birleştiren metodolojik bir profil geliştirdim. 
+                Dijital dokümantasyon, fotogrametri ve semantik web teknolojileri üzerine uzmanlaşmaktayım.
+            </p>
+        </section>
+
+        <!-- Projeler -->
+        <section id="projects">
+            <h2>Öne Çıkan Çalışmalar</h2>
+            <div class="grid">
+                <div class="card">
+                    <span class="date">Arkeolojik Teknoloji</span>
+                    <h3>Rüpe Magna RTI Sistemi</h3>
+                    <p>Valtellina'daki kaya resimleri için özelleştirilmiş RTI (Reflectance Transformation Imaging) donanım ve yazılım sisteminin tasarımı ve validasyonu.</p>
+                </div>
+                <div class="card">
+                    <span class="date">Semantik Web</span>
+                    <h3>Dijital Epigrafi Ontolojisi</h3>
+                    <p>FAIR prensiplerine uygun, RDF ve OWL tabanlı arkeolojik veri modelleme ve ontoloji geliştirme çalışmaları.</p>
+                </div>
+                <div class="card">
+                    <span class="date">3D Modelleme</span>
+                    <h3>Pompeii Dijital İkiz</h3>
+                    <p>Lazer tarayıcı ve fotogrametri verileri kullanılarak yapısal rekonstrüksiyon ve 3D dökümantasyon projeleri.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deneyim -->
+        <section id="experience">
+            <h2>Saha Deneyimi</h2>
+            <div class="card" style="margin-bottom: 20px;">
+                <span class="date">2021 - Günümüz</span>
+                <h3>Bologna Üniversitesi | İtalya</h3>
+                <p>Dijital Dokümantasyon ve RTI sistemleri üzerine araştırma ve uygulama. Pompei, Marzabotto ve Vivara kazılarında teknik sorumluluk.</p>
+            </div>
+            <div class="card" style="margin-bottom: 20px;">
+                <span class="date">2015 - 2020</span>
+                <h3>Hierapolis & Dorylaion | Türkiye</h3>
+                <p>Stratigrafik kazı, jeomatik ölçüm ve 3D lazer tarama süreçlerinin yönetimi.</p>
+            </div>
+        </section>
+
+        <!-- Uzmanlık -->
+        <section id="skills">
+            <h2>Teknik Uzmanlık</h2>
+            <div class="skills-tag-container">
+                <div class="skill-tag">RDF & OWL</div>
+                <div class="skill-tag">Python</div>
+                <div class="skill-tag">Photogrammetry</div>
+                <div class="skill-tag">Blender 3D</div>
+                <div class="skill-tag">AutoCAD</div>
+                <div class="skill-tag">Laser Scanning</div>
+                <div class="skill-tag">Semantic Web</div>
+                <div class="skill-tag">LaTeX</div>
+                <div class="skill-tag">RTI Imaging</div>
+            </div>
+        </section>
+
+        <!-- İletişim -->
+        <section id="contact">
+            <h2>İletişim</h2>
+            <p>Akademik iş birlikleri ve projeler için benimle iletişime geçebilirsiniz.</p>
+            <p style="margin-top: 20px;">
+                <strong>E-posta:</strong> huseyin.erdogan@studio.unibo.it<br>
+                <strong>Konum:</strong> Bologna, İtalya
+            </p>
+        </section>
+    </main>
+
+    <script>
+        // Kaydırma sırasında bölümleri görünür yapma
+        const sections = document.querySelectorAll('section');
+        const options = { threshold: 0.2 };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    updateNav(entry.target.id);
+                }
+            });
+        }, options);
+
+        sections.forEach(section => observer.observe(section));
+
+        function activateLink(el) {
+            document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function updateNav(id) {
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + id) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
