@@ -3,5 +3,5 @@
   Format="jpg"
   Overlap="0"
   TileSize="256">
-  <Size Height="1200" Width="1200"/>
+  <Size Height="1000" Width="1000"/>
 </Image>
