@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8" />
 
-    <!-- Dynamically set stylesheet via config -->
     <link id="skinCssLink" rel="stylesheet" href="" />
 
     <style>
@@ -19,6 +18,22 @@
         #openlime {
             position:relative;
             height: 100%
+        }
+        /* Sensör İzin Butonu Stili */
+        #gyro-auth-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+            border-radius: 25px;
+            font-family: sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -186,6 +201,45 @@
                 ui.lightcontroller.setPosition(initialX, initialY);
                 }
             });
+
+            // --- MOBİL JİROSKOP KONTROLÜ BAŞLANGIÇ ---
+            function handleOrientation(event) {
+                if (!ui.lightcontroller || !ui.lightcontroller.setPosition) return;
+
+                // gamma: sağ/sol yatış (-90 to 90)
+                // beta: ön/arka yatış (-180 to 180)
+                let x = event.gamma; 
+                let y = event.beta;
+
+                // Cihazın duruşuna göre normalizasyon (45 derece tam kapasite kabul edilir)
+                let nx = Math.max(-1, Math.min(1, x / 45));
+                let ny = Math.max(-1, Math.min(1, (y - 45) / 45));
+
+                ui.lightcontroller.setPosition(nx, -ny);
+            }
+
+            // iOS 13+ için izin kontrolü
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                const btn = document.createElement('button');
+                btn.id = 'gyro-auth-btn';
+                btn.innerHTML = "Işık Kontrolü İçin Hareket Sensörünü Aç";
+                document.body.appendChild(btn);
+
+                btn.onclick = () => {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => {
+                            if (response == 'granted') {
+                                window.addEventListener('deviceorientation', handleOrientation);
+                                btn.style.display = 'none';
+                            }
+                        })
+                        .catch(console.error);
+                };
+            } else {
+                // Android veya eski iOS
+                window.addEventListener('deviceorientation', handleOrientation);
+            }
+            // --- MOBİL JİROSKOP KONTROLÜ BİTİŞ ---
 
             // Make the light follow mouse movement without clicking
             const __container = lime.containerElement || document.getElementById('demo');
