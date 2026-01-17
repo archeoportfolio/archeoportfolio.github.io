@@ -2,41 +2,23 @@
 <html>
 
 <head>
-    <title>RTI Viewer - Framer Compatible</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>RTIViewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="skin.css" />
+
+    <!-- Dynamically set stylesheet via config -->
+    <link id="skinCssLink" rel="stylesheet" href="" />
 
     <style>
         html, body {
             margin: 0px;
             padding: 0px;
             height: 100%;
-            /* Scroll problemini çözmek için overflow'u serbest bırakıyoruz */
-            overflow: visible !important; 
-            background: black;
+            overflow: hidden;
         }
-
-        #demo {
-            position: relative;
-            width: 100%;
-            height: 100%; /* Embed alanına tam oturması için */
-            background: black;
-            /* Dokunmatik cihazlarda sayfa kaydırmayı engellememesi için */
-            touch-action: pan-y !important;
-        }
-
-        /* Tüm OpenLIME arayüz elemanlarını CSS ile temizle */
-        .openlime-toolbar, .openlime-menu, .openlime-sidebar, 
-        .openlime-topbar, .openlime-footer, .openlime-controls, 
-        .openlime-menu-button, .openlime-panel, .openlime-lightdir { 
-            display: none !important; 
-        }
-
-        canvas {
-            cursor: crosshair;
-            /* Mouse tekerleğinin tarayıcıya iletilmesini sağlar */
-            pointer-events: auto;
+        #openlime {
+            position:relative;
+            height: 100%
         }
     </style>
 </head>
@@ -45,106 +27,134 @@
     <div id="demo" class="openlime"></div>
 </body>
 
-<script src="openlime.min.js"></script>
-
 <script>
-// RTI Algılama Fonksiyonları (Korundu)
-async function autodetect() {
-    let response = await fetch('plane_0.tzi');
-    if(response.status == 200) return "tarzoom";
-    response = await fetch('plane_0.dzi');
-    if(response.status == 200) return "deepzoom";
-    response = await fetch('planes.tzi');
-    if(response.status == 200) return "itarzoom";
-    response = await fetch('plane_0.jpg');
-    if(response.status == 200) return "image";
-    return "";
-}
+    const config = {
+        stylesheetUrl: 'skin.css',
+        openlimeUrl: 'openlime.min.js',
+        skinUrl: 'skin.svg',
+        rtiUrl: 'info.json',
+        rtiLabel: 'PTM-DeepZoom',
+        vectorUrl: 'vector.png'
+    };
 
-async function autodetectNormals(layout) {
-    let checkUrls = { 'tarzoom': 'normals.tzi', 'deepzoom': 'normals.dzi', 'image': 'normals.jpg' };
-    if (checkUrls[layout]) {
-        let response = await fetch(checkUrls[layout]);
-        return response.status == 200;
-    }
-    return false;
-}
+    document.getElementById('skinCssLink').href = config.stylesheetUrl;
 
-async function init() {
-    const layout = await autodetect();
-    const normals = await autodetectNormals(layout);
-    
-    // Viewer başlatma
-    const lime = new OpenLIME.Viewer('#demo', { background:'black' });
+    const openlimeScript = document.createElement('script');
+    openlimeScript.src = config.openlimeUrl;
+    document.head.appendChild(openlimeScript);
 
-    // Ana RTI Katmanı
-    const layer = new OpenLIME.Layer({ 
-        layout: layout, 
-        type:'rti',
-        url: 'info.json',
-        normals: normals
-    });
-    lime.canvas.addLayer('RTI', layer); 
+    openlimeScript.onload = function() {
 
-    // Vektör Katmanı (Her zaman aktif)
-    const vectorLayer = new OpenLIME.Layer({
-        type: 'image',
-        url: 'vector.png',
-        overlay: true,
-        visible: true
-    });
-    lime.canvas.addLayer('vector', vectorLayer);
-
-    // UI Ayarları
-    OpenLIME.Skin.setUrl('skin.svg');
-    const ui = new OpenLIME.UIBasic(lime, { skin: 'skin.svg', showLightDirections: false });
-
-    // Menüleri kapat
-    Object.keys(ui.actions).forEach(key => {
-        if (ui.actions[key]) ui.actions[key].display = false;
-    });
-
-    // Zoom özelliğini kökten kapat
-    lime.camera.maxFixedZoom = 0;
-    lime.camera.minFixedZoom = 0;
-
-    // Işık butonu aktif ama tıklama kontrolü kapalı (Otomatik mod için)
-    ui.actions.light.active = true;
-    if (ui.actions.light) {
-        ui.actions.light.mouseControl = false; 
-    }
-
-    // --- KRİTİK SCROLL ÇÖZÜMÜ ---
-    // OpenLIME'ın tekerlek olaylarını "yutmasını" engelliyoruz
-    const container = document.getElementById('demo');
-    
-    // Kütüphanenin wheel listener'larını etkisiz hale getir
-    lime.canvas.ui.onwheel = null;
-    lime.canvas.canvas.onwheel = null;
-    
-    // Tarayıcıya tekerleği serbest bırakması için pasif dinleyici ekle
-    container.addEventListener('wheel', (e) => {
-        // Fonksiyon boş: Sadece event'in yukarı (Framer'a) çıkmasına izin verir
-    }, { passive: true });
-
-    // --- OTOMATİK IŞIK TAKİBİ ---
-    container.addEventListener('mousemove', (ev) => {
-        const rect = container.getBoundingClientRect();
-        const x = (ev.clientX - rect.left) / rect.width;
-        const y = (ev.clientY - rect.top) / rect.height;
-        
-        const px = 2 * Math.max(0, Math.min(1, x)) - 1;
-        const py = 2 * (1 - Math.max(0, Math.min(1, y))) - 1;
-
-        if (ui.lightcontroller && ui.lightcontroller.setPosition) {
-            ui.lightcontroller.setPosition(px, py);
+        async function autodetect() {
+            let response = await fetch('plane_0.tzi');
+            if(response.status == 200) return "tarzoom";
+            response = await fetch('plane_0.dzi');
+            if(response.status == 200) return "deepzoom";
+            response = await fetch('planes.tzi');
+            if(response.status == 200) return "itarzoom";
+            response = await fetch('plane_0.jpg');
+            if(response.status == 200) return "image";
+            alert("RTI could not be detected here");
+            return "";
         }
-    });
 
-    window.lime = lime;
-}
+        async function autodetectNormals(layout) {
+            if(layout == 'tarzoom') {
+                let response = await fetch('normals.tzi');
+                if(response.status == 200) return true;
+            }
+            if(layout == 'deepzoom') {
+                let response = await fetch('normals.dzi');
+                if(response.status == 200) return true;
+            }
+            if(layout == 'image') {
+                let response = await fetch('normals.jpg');
+                if(response.status == 200) return true;
+            }
+            return false;
+        }
 
-init();
+        async function init() {
+            let layout = await autodetect();
+            let normals = await autodetectNormals(layout);
+            var lime = new OpenLIME.Viewer('#demo', { background:'black' });
+
+            let baseLayer = new OpenLIME.Layer({
+                layout: layout,
+                type:'rti',
+                url: config.rtiUrl,
+                normals: normals,
+                label: config.rtiLabel
+            });
+            lime.canvas.addLayer('RTI', baseLayer);
+
+            // Vector Layer
+            const vectorLayer = new OpenLIME.Layer({
+                type: 'image',
+                url: config.vectorUrl,
+                overlay: true,
+                visible: true
+            });
+            lime.canvas.addLayer('vector', vectorLayer);
+
+            OpenLIME.Skin.setUrl(config.skinUrl);
+            let ui = new OpenLIME.UIBasic(lime, { skin: config.skinUrl, showLightDirections: false });
+
+            // Enable light but hide its button and disable built-in click/drag control
+            ui.actions.light.active = true;
+            if (ui.actions.light) {
+                ui.actions.light.display = false;
+                ui.actions.light.mouseControl = false;
+            }
+
+            // Ensure camera limits remain sane
+            lime.camera.maxFixedZoom = 0;
+            lime.camera.wheelZoom = false;
+            window.lime = lime;
+
+            // Hide any remaining UI elements via CSS
+            const __hideUiStyle = document.createElement('style');
+            __hideUiStyle.innerHTML = `
+                .openlime-toolbar, .openlime-menu, .openlime-sidebar, .openlime-topbar, .openlime-footer, .openlime-controls, .openlime-menu-button, .openlime-panel { display:none !important; }
+                .openlime-lightdir { display:none !important; }
+            `;
+            document.head.appendChild(__hideUiStyle);
+
+            // Make the light follow mouse movement without clicking
+            const __container = lime.containerElement || document.getElementById('demo');
+            // Throttle updates with requestAnimationFrame to avoid flooding updates
+            let __pendingLightUpdate = false;
+            const __lightPos = { x: 0, y: 0 };
+            __container.addEventListener('mousemove', (ev) => {
+                const rect = __container.getBoundingClientRect();
+                const x = (ev.clientX - rect.left) / rect.width;
+                const y = (ev.clientY - rect.top) / rect.height;
+                const cx = Math.max(0, Math.min(1, x));
+                const cy = Math.max(0, Math.min(1, y));
+
+                // Map to controller coordinates: center at 0, range [-1,1], invert Y to match controller
+                const px = 2 * cx - 1;            // left -> -1, center -> 0, right -> +1
+                const py = 2 * (1 - cy) - 1;      // top -> +1, center -> 0, bottom -> -1
+
+                __lightPos.x = px;
+                __lightPos.y = py;
+
+                if (!__pendingLightUpdate) {
+                    __pendingLightUpdate = true;
+                    requestAnimationFrame(() => {
+                        __pendingLightUpdate = false;
+                        if (ui.lightcontroller && ui.lightcontroller.setPosition) {
+                            ui.lightcontroller.setPosition(__lightPos.x, __lightPos.y);
+                        } else if (ui.light && ui.lightcontroller && ui.lightcontroller.setPosition) {
+                            ui.lightcontroller.setPosition(__lightPos.x, __lightPos.y);
+                        }
+                    });
+                }
+            });
+        }
+
+        init();
+    };
 </script>
 
 </html>
