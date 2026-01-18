@@ -5,28 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transfer</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Strong encryption library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body { background-color: #ffffff; margin: 0; overflow: hidden; font-family: sans-serif; }
-        .drag-over { background-color: #fafafa; border: 2px dashed #e2e8f0 !important; }
+        .drag-over { background-color: #fafafa; border: 2px dashed #3b82f6 !important; }
         #drop-zone { transition: all 0.2s ease-in-out; border: 2px dashed transparent; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
 
-    <!-- SETUP PANEL (Open with "setup" to generate your encrypted data) -->
+    <!-- SETUP PANEL -->
     <div id="setup-panel" class="fixed inset-0 bg-white z-[100] flex items-center justify-center p-6 hidden">
         <div class="w-full max-w-sm space-y-4">
-            <h2 class="text-xs uppercase tracking-widest text-slate-400 mb-6 text-center">Data Encryptor</h2>
-            <input type="password" id="s-token" placeholder="GitHub Token" class="w-full border-b p-2 text-sm outline-none">
-            <input type="text" id="s-repo" placeholder="username/repo" class="w-full border-b p-2 text-sm outline-none">
-            <input type="password" id="s-key" placeholder="Enter Your Secret Password" class="w-full border-b p-2 text-sm outline-none font-bold text-blue-600">
-            <button onclick="encryptData()" class="w-full bg-black text-white text-xs py-3 tracking-widest uppercase">Encrypt Data</button>
+            <h2 class="text-xs uppercase tracking-widest text-slate-400 mb-6 text-center font-bold">Data Encryptor</h2>
+            <input type="password" id="s-token" placeholder="GitHub Token (ghp_...)" class="w-full border-b p-2 text-sm outline-none">
+            <input type="text" id="s-repo" placeholder="username/repository" class="w-full border-b p-2 text-sm outline-none">
+            <input type="password" id="s-key" placeholder="Encryption Password class="w-full border-b p-2 text-sm outline-none font-bold text-blue-600">
+            <button onclick="encryptData()" class="w-full bg-black text-white text-xs py-3 tracking-widest uppercase hover:bg-slate-800 transition-colors">Encrypt & Generate</button>
             <div id="result-box" class="hidden mt-4 p-3 bg-slate-50 text-[10px] break-all border border-dashed border-slate-200 select-all font-mono text-slate-500"></div>
-            <p class="text-[10px] text-slate-400 mt-2 italic text-center">Copy the text above and paste it into DATA_VAULT in the code.</p>
-            <button onclick="this.parentElement.parentElement.classList.add('hidden')" class="w-full text-[10px] text-slate-300 mt-4 underline">Close</button>
+            <p class="text-[10px] text-slate-400 mt-2 italic text-center">Copy the string above and paste it into DATA_VAULT in the code.</p>
+            <button onclick="document.getElementById('setup-panel').classList.add('hidden')" class="w-full text-[10px] text-slate-300 mt-4 underline">Close</button>
         </div>
     </div>
 
@@ -48,66 +47,46 @@
 
     <script>
         /**
-         * STEP 1: Open the page, type "setup" in the password box and press Enter.
-         * STEP 2: Enter Token, Repo, and your desired Password. Click "Encrypt Data".
-         * STEP 3: Copy the resulting string and paste it between the quotes below.
+         * Buraya setup ile ürettiğin metni yapıştır.
          */
-        const DATA_VAULT = "U2FsdGVkX1/rX+CKkoD1tN4Gl5bIjKrjfUXSOd2GwAkUUT/2yr4nofwwp8C0gUQTROig26l/YHmZ6KFs+6BLWZINnxqIRKvFb5ycY7Dt78H+Y9hWPQoDnazk9ExwqZNHRFUpHYdcmemPa0r7QWKkWw=="; 
+        const DATA_VAULT = "U2FsdGVkX1++5ARLGkdnVCHLUPGX2IOy42XRfJ4YDxp2v45Yeqw/H5NCzXKkPz0hAoVdukp95TaoYrl/zJGpMTAG6VfRxu4UEVBm5fDCzkfZC69hCrD8NGHQe3niGmT68OkocoFizN8gVSoYrnd0tw=="; 
 
         let ACTIVE_CONFIG = null;
 
         document.getElementById('unlock-pass').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 const passAttempt = e.target.value;
-                
                 if (passAttempt === "setup") {
                     document.getElementById('setup-panel').classList.remove('hidden');
                     return;
                 }
-
                 if (!DATA_VAULT) {
-                    e.target.value = "";
-                    e.target.placeholder = "Data Vault is Empty (Type setup)";
-                    return;
+                    e.target.value = ""; e.target.placeholder = "Vault Empty (Type setup)"; return;
                 }
-
                 try {
-                    // Attempt to decrypt with the provided password
                     const bytes = CryptoJS.AES.decrypt(DATA_VAULT, passAttempt);
                     const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
-                    
-                    if (!decryptedStr) throw new Error("Incorrect Password");
-                    
+                    if (!decryptedStr) throw new Error("Key mismatch");
                     const decrypted = JSON.parse(decryptedStr);
-                    
                     if (decrypted.t && decrypted.r) {
                         ACTIVE_CONFIG = decrypted;
                         document.getElementById('unlock-screen').classList.add('hidden');
                     }
                 } catch (err) {
-                    e.target.value = "";
-                    e.target.placeholder = "Access Denied";
+                    e.target.value = ""; e.target.placeholder = "Access Denied";
                 }
             }
         });
 
         function encryptData() {
-            const t = document.getElementById('s-token').value;
-            const r = document.getElementById('s-repo').value;
-            const k = document.getElementById('s-key').value;
-            
-            if(!t || !r || !k) {
-                alert("Please fill all fields!");
-                return;
-            }
-            
+            const t = document.getElementById('s-token').value.trim();
+            const r = document.getElementById('s-repo').value.trim();
+            const k = document.getElementById('s-key').value.trim();
+            if(!t || !r || !k) return;
             const data = JSON.stringify({ t: t, r: r });
-            // Use the key provided in the setup panel
             const encrypted = CryptoJS.AES.encrypt(data, k).toString();
-            
             const box = document.getElementById('result-box');
-            box.innerText = encrypted;
-            box.classList.remove('hidden');
+            box.innerText = encrypted; box.classList.remove('hidden');
         }
 
         const dropZone = document.getElementById('drop-zone');
@@ -117,38 +96,60 @@
         window.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); instructionText.innerText = "Release"; });
         window.addEventListener('dragleave', (e) => { dropZone.classList.remove('drag-over'); instructionText.innerText = "Drop files here"; });
         window.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            instructionText.innerText = "Drop files here";
+            e.preventDefault(); dropZone.classList.remove('drag-over'); instructionText.innerText = "Drop files here";
             if (ACTIVE_CONFIG) handleFiles(e.dataTransfer.files);
         });
 
         async function handleFiles(files) {
             for (let file of files) {
                 const statusNode = document.createElement('div');
-                statusNode.className = 'bg-black text-white text-[10px] p-2 rounded flex justify-between items-center opacity-90';
+                statusNode.className = 'bg-black text-white text-[10px] p-2 rounded flex justify-between items-center opacity-90 mb-2';
                 statusNode.innerHTML = `<span>${file.name}</span> <span class="ml-4 opacity-50 italic">Uploading...</span>`;
                 statusContainer.appendChild(statusNode);
 
                 const reader = new FileReader();
-                reader.readAsDataURL(file);
+                reader.readAsArrayBuffer(file);
                 reader.onload = async () => {
-                    const content = reader.result.split(',')[1];
+                    const base64Content = btoa(new Uint8Array(reader.result).reduce((data, byte) => data + String.fromCharCode(byte), ''));
+                    // DOĞRU URL YAPISI: /repos/{repo}/contents/{path}
                     const url = `https://api.github.com/repos/${ACTIVE_CONFIG.r}/contents/${file.name}`;
-                    let sha = null;
+                    
                     try {
-                        const check = await fetch(url, { headers: { 'Authorization': `token ${ACTIVE_CONFIG.t}` } });
-                        if (check.ok) { const d = await check.json(); sha = d.sha; }
+                        const check = await fetch(url, { 
+                            headers: { 
+                                'Authorization': `Bearer ${ACTIVE_CONFIG.t}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            } 
+                        });
+                        
+                        let sha = null;
+                        if (check.ok) { 
+                            const d = await check.json(); sha = d.sha; 
+                        }
+
                         const res = await fetch(url, {
                             method: 'PUT',
-                            headers: { 'Authorization': `token ${ACTIVE_CONFIG.t}`, 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ message: 'upload', content: content, sha: sha })
+                            headers: { 
+                                'Authorization': `Bearer ${ACTIVE_CONFIG.t}`, 
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ 
+                                message: `Upload via Vault`, 
+                                content: base64Content, 
+                                sha: sha 
+                            })
                         });
-                        statusNode.innerHTML = `<span>${file.name}</span> <span class="${res.ok ? 'text-green-400' : 'text-red-400'}">${res.ok ? 'Success' : 'Error'}</span>`;
+
+                        if(res.ok) {
+                            statusNode.innerHTML = `<span>${file.name}</span> <span class="text-green-400">SUCCESS</span>`;
+                        } else {
+                            const err = await res.json();
+                            statusNode.innerHTML = `<span>${file.name}</span> <span class="text-red-400">FAIL: ${res.status}</span>`;
+                        }
                     } catch (e) {
-                        statusNode.innerHTML = `<span>${file.name}</span> <span class="text-red-400">Net Error</span>`;
+                        statusNode.innerHTML = `<span>${file.name}</span> <span class="text-yellow-400">NET ERROR</span>`;
                     }
-                    setTimeout(() => statusNode.remove(), 2500);
+                    setTimeout(() => statusNode.remove(), 5000);
                 };
             }
         }
