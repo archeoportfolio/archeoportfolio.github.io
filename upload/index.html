@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background-color: #ffffff; 
+            margin: 0;
+            overflow: hidden;
+        }
+        .drag-over {
+            background-color: #fafafa;
+            border: 2px dashed #e2e8f0 !important;
+        }
+        #drop-zone {
+            transition: all 0.2s ease-in-out;
+            border: 2px dashed transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+
+    <!-- CONFIGURATION: Fill your details here -->
+    <script>
+        const CONFIG = {
+            TOKEN: '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',
+            REPO: 'e-huseyin/e-huseyin.github.io/upload',
+            PATH: '' 
+        };
+    </script>
+
+    <!-- Full page drop zone -->
+    <div id="drop-zone" class="fixed inset-0 flex flex-col items-center justify-center cursor-default">
+        <input type="file" id="file-input" class="hidden" multiple>
+        
+        <div id="instruction-text" class="text-slate-300 text-sm font-light tracking-widest uppercase pointer-events-none">
+            Drop files here
+        </div>
+
+        <!-- Status Notifications -->
+        <div id="status-container" class="fixed bottom-8 w-full max-w-xs space-y-2 px-4"></div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const statusContainer = document.getElementById('status-container');
+        const instructionText = document.getElementById('instruction-text');
+
+        // Drag and drop events
+        window.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+            instructionText.innerText = "Release to upload";
+            instructionText.classList.replace('text-slate-300', 'text-blue-400');
+        });
+
+        window.addEventListener('dragleave', (e) => {
+            if (e.relatedTarget === null) {
+                dropZone.classList.remove('drag-over');
+                instructionText.innerText = "Drop files here";
+                instructionText.classList.replace('text-blue-400', 'text-slate-300');
+            }
+        });
+
+        window.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            instructionText.innerText = "Drop files here";
+            instructionText.classList.replace('text-blue-400', 'text-slate-300');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // Optional click to upload
+        dropZone.onclick = () => fileInput.click();
+        fileInput.onchange = (e) => handleFiles(e.target.files);
+
+        async function handleFiles(files) {
+            // No alert or error message, just silent guard
+            if (CONFIG.TOKEN === 'YOUR_GITHUB_TOKEN_HERE' || !CONFIG.REPO) {
+                return;
+            }
+
+            for (let file of files) {
+                uploadFile(file);
+            }
+        }
+
+        async function uploadFile(file) {
+            const fileName = file.name;
+            const cleanPath = CONFIG.PATH.replace(/\/$/, '');
+            const filePath = cleanPath ? `${cleanPath}/${fileName}` : fileName;
+            
+            const statusNode = document.createElement('div');
+            statusNode.className = 'bg-black text-white text-[10px] p-2 rounded flex justify-between items-center opacity-90 transition-opacity';
+            statusNode.innerHTML = `<span>${fileName}</span> <span class="ml-4 opacity-50">Uploading...</span>`;
+            statusContainer.appendChild(statusNode);
+
+            try {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = async () => {
+                    const content = reader.result.split(',')[1];
+                    const url = `https://api.github.com/repos/${CONFIG.REPO}/contents/${filePath}`;
+
+                    let sha = null;
+                    try {
+                        const checkRes = await fetch(url, { headers: { 'Authorization': `token ${CONFIG.TOKEN}` } });
+                        if (checkRes.ok) {
+                            const checkData = await checkRes.json();
+                            sha = checkData.sha;
+                        }
+                    } catch (e) {}
+
+                    const res = await fetch(url, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${CONFIG.TOKEN}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: `Transfer: ${fileName}`,
+                            content: content,
+                            sha: sha
+                        })
+                    });
+
+                    if (res.ok) {
+                        statusNode.innerHTML = `<span>${fileName}</span> <span class="text-green-400">Success</span>`;
+                        setTimeout(() => {
+                            statusNode.style.opacity = '0';
+                            setTimeout(() => statusNode.remove(), 500);
+                        }, 2000);
+                    } else {
+                        statusNode.innerHTML = `<span>${fileName}</span> <span class="text-red-400">Error</span>`;
+                        setTimeout(() => statusNode.remove(), 5000);
+                    }
+                };
+            } catch (err) {
+                statusNode.remove();
+            }
+        }
+    </script>
+</body>
+</html>
