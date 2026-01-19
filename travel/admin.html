@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İtalya Rehberi | Admin Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --accent: #000000;
+            --border: #e5e5e5;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .admin-container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        h1 { font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 25px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.8; }
+
+        .output-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        pre {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .copy-hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        @media (max-width: 600px) {
+            .row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="admin-container">
+    <h1>Yeni Deneyim Ekle</h1>
+    
+    <div class="row">
+        <div class="form-group">
+            <label>Şehir</label>
+            <select id="city">
+                <option value="roma">Roma</option>
+                <option value="floransa">Floransa</option>
+                <option value="venedik">Venedik</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Kategori</label>
+            <select id="category">
+                <option value="yemek">Yeme-İçme</option>
+                <option value="muze">Müzeler & Gezi</option>
+                <option value="otel">Konaklama</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Mekan/Deneyim Adı (Örn: ❶ Trattoria Dall'Oste)</label>
+        <input type="text" id="name" placeholder="Numaralı ve ikonlu yazabilirsiniz">
+    </div>
+
+    <div class="form-group">
+        <label>Görsel Linkleri (Virgülle ayırın)</label>
+        <input type="text" id="img" placeholder="images/resim1.jpg, images/resim2.jpg">
+    </div>
+
+    <div class="form-group">
+        <label>Açıklama</label>
+        <textarea id="desc" rows="4" placeholder="Deneyiminizi buraya yazın..."></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Meta Bilgi (Adres/Uyarı)</label>
+        <input type="text" id="meta" placeholder="📍 Adres veya ❗️ Önemli bir not">
+    </div>
+
+    <div class="form-group">
+        <label>Linkler (Format: İsim|URL - Her satıra bir tane)</label>
+        <textarea id="links" rows="3" placeholder="Google Maps|https://...&#10;Menü|https://..."></textarea>
+    </div>
+
+    <button class="btn" onclick="generateCode()">KODU OLUŞTUR</button>
+
+    <div id="outputSection" class="output-section">
+        <span class="copy-hint">Aşağıdaki kodu kopyalayıp index.html içindeki <b>cityData</b> objesinde ilgili kategori listesinin sonuna yapıştırın:</span>
+        <pre id="resultCode"></pre>
+        <button class="btn" style="background: #28a745; margin-top: 10px;" onclick="copyToClipboard()">KODU KOPYALA</button>
+    </div>
+</div>
+
+<script>
+    function generateCode() {
+        const name = document.getElementById('name').value;
+        const imgInput = document.getElementById('img').value;
+        const desc = document.getElementById('desc').value;
+        const meta = document.getElementById('meta').value;
+        const linksInput = document.getElementById('links').value;
+
+        // Görselleri diziye çevir
+        let img;
+        const imgs = imgInput.split(',').map(s => s.trim()).filter(s => s !== "");
+        if (imgs.length === 0) img = "";
+        else if (imgs.length === 1) img = imgs[0];
+        else img = imgs;
+
+        // Linkleri objeye çevir
+        const links = linksInput.split('\n')
+            .filter(line => line.includes('|'))
+            .map(line => {
+                const [label, url] = line.split('|');
+                return { label: label.trim(), url: url.trim() };
+            });
+
+        const entry = {
+            name,
+            img,
+            desc,
+            meta,
+            links
+        };
+
+        // JSON formatına getir ve başına virgül ekle (listeye ekleme kolaylığı için)
+        const jsonOutput = ",\n" + JSON.stringify(entry, null, 16).replace(/}$/, "                }");
+        
+        document.getElementById('resultCode').innerText = jsonOutput;
+        document.getElementById('outputSection').style.display = 'block';
+        document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('resultCode').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Kod kopyalandı! Şimdi index.html içine yapıştırabilirsin.");
+        });
+    }
+</script>
+
+</body>
+</html>

@@ -231,6 +231,25 @@
             background: #f9f9f9;
         }
 
+        .vertical-images-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: calc(100% + 200px);
+            max-width: 1000px;
+            margin-left: -100px;
+            margin-bottom: 1.5rem;
+        }
+
+        .vertical-images-grid img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 3 / 4;
+            object-fit: cover;
+            border-radius: 2px;
+            background: #f9f9f9;
+        }
+
         .venue-description {
             color: var(--text-main);
             font-size: 1.15rem;
@@ -343,7 +362,7 @@
         }
 
         @media (max-width: 1000px) {
-            .venue-image, .dual-image-container, .triple-image-layout {
+            .venue-image, .dual-image-container, .triple-image-layout, .vertical-images-grid {
                 width: 100%;
                 margin-left: 0;
             }
@@ -360,6 +379,7 @@
         @media (max-width: 480px) {
             .dual-image-container, .triple-image-bottom { flex-direction: column; gap: 15px; }
             .dual-image-container img, .triple-image-bottom img { width: 100%; }
+            .vertical-images-grid { grid-template-columns: 1fr; }
             .nav-links, .sub-nav-links { gap: 0.8rem; }
             .nav-links a { font-size: 0.8rem; }
             .sub-nav-links a { font-size: 0.7rem; }
@@ -728,6 +748,24 @@
                         links: [
                             { label: "Google Maps", url: "https://maps.app.goo.gl/s8FMvs5TWxyVJss37" }
                         ]
+                    },
+                    {
+                        name: "<span style='color: #9a5b40;'>❸</span> Ca' d'oro Alla Vedova",
+                        img: ["images/veneziavedova.webp", "images/veneziavedova2.webp", "images/veneziavedova3.webp", "images/veneziavedova4.webp"],
+                        desc: "Venedik'li bir arkadaşımın önerisi olan Alla Vedova (Dulun Yeri), Venedik’in en eski ve en ikonik cicchetti mekanlarından biridir. Burası Venedik’in en iyi Polpette (et köftesi) yapan yeri kabul edilir. Bar kısmında ayaküstü bir kadeh şarap (ombra) ve köfte yemek bir ritüeldir. Masaya oturursanız Bigoli in salsa (soğanlı ve ansüezli makarna) mutlaka denenmeli.",
+                        meta: "📍 Ramo Ca' d'Oro, 3912, 30121 Venezia VE",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/dwqYYYAbAzouybSd7" }
+                        ]
+                    },
+                    {
+                        name: "<span style='color: #9a5b40;'>❹</span> Osteria Da Codroma",
+                        img: ["images/veneziacodroma.webp"],
+                        desc: "Yine Venedik'li bir arkadaşımın önerisi olan Osteria da Codroma 18. yüzyıldan kalma tarihi bir tavernadır. Akademisyenlerin, sanatçıların ve yerel halkın uğrak noktasıdır. Uzun ahşap masaları ve samimi bir mahalle havası vardır. Geleneksel \"Cucina Casalinga\" (ev yapımı mutfak) hakimdir. Ana yemekte mürekkep balıklı risotto denenebilir.",
+                        meta: "📍 Fondamenta Briati, 2540, 30123 Venezia VE",
+                        links: [
+                            { label: "Google Maps", url: "https://maps.app.goo.gl/ej9m8to5rdDRsPEH6" }
+                        ]
                     }
                 ],
                 otel: [
@@ -795,21 +833,24 @@
         let imgHtml = '';
         
         // Çoklu resim düzenleri (Müze/Yemek kategorileri için)
-        if (item.layout === "triple" && Array.isArray(item.img)) {
+        if (item.layout === "triple" && Array.isArray(item.img) && item.img.length === 3) {
             imgHtml = `
                 <div class="triple-image-layout">
-                    <img src="${item.img[0]}" class="triple-image-top">
+                    <img src="${item.img[0]}" class="triple-image-top" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">
                     <div class="triple-image-bottom">
-                        <img src="${item.img[1]}">
-                        <img src="${item.img[2]}">
+                        <img src="${item.img[1]}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">
+                        <img src="${item.img[2]}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">
                     </div>
                 </div>`;
+        } else if (Array.isArray(item.img) && item.img.length === 1) {
+            imgHtml = `<img src="${item.img[0]}" class="venue-image" onerror="this.style.display='none'">`;
         } else if (Array.isArray(item.img)) {
-            imgHtml = `<div class="dual-image-container">
-                <img src="${item.img[0]}">
-                <img src="${item.img[1]}">
-            </div>`;
-        } 
+            imgHtml = `<div class="vertical-images-grid">`;
+            item.img.forEach(src => {
+                imgHtml += `<img src="${src}" onerror="this.src='https://via.placeholder.com/400x600?text=Gorsel+Yok'">`;
+            });
+            imgHtml += `</div>`;
+        }
         // Tek resim ama dikey değil (Geniş Resim) durumunda normal venue-image sınıfını kullanır
         else if (item.img) {
             imgHtml = `<img src="${item.img}" class="venue-image" onerror="this.style.display='none'">`;
