@@ -88,6 +88,9 @@
             });
             lime.canvas.addLayer('RTI', baseLayer);
 
+            // Starting Layer
+            baseLayer.setMode('specular');
+
             // Vector Layer
             const vectorLayer = new OpenLIME.Layer({
                 type: 'image',
