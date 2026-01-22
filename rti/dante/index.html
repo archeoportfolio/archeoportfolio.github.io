@@ -34,8 +34,7 @@
         skinUrl: 'skin.svg',
         rtiUrl: 'info.json',
         rtiLabel: 'PTM-DeepZoom',
-        vectorUrl: 'vector.png',
-        vectorLabel: 'Vector On/Off'
+        vectorUrl: 'vector.png'
     };
 
     document.getElementById('skinCssLink').href = config.stylesheetUrl;
@@ -97,68 +96,13 @@
                 type: 'image',
                 url: config.vectorUrl,
                 overlay: true,
-                visible: true,
-                label: config.vectorLabel
+                visible: true
             });
             lime.canvas.addLayer('vector', vectorLayer);
-
-            let lensContentLayer = new OpenLIME.Layer({
-                layout: layout,
-                type:'rti',
-                url: config.rtiUrl,
-                normals: normals,
-                visible: false,
-                label: 'Lens'
-            });
-            lime.canvas.addLayer('RTI Normals', lensContentLayer);
-            
-            if (lensContentLayer.shader && lensContentLayer.shader.modes) {
-                lensContentLayer.setMode('normals');
-            }
-
-            const lensDashboard = new OpenLIME.LensDashboardNavigator(lime, {
-                borderColor: [0.078, 0.078, 0.078, 1],
-                borderWidth: 12,
-                containerSpace: 80
-            });
-
-            const lensLayer = new OpenLIME.Layer({
-                type: 'lens',
-                layers: [lensContentLayer],
-                camera: lime.camera,
-                radius: 200,
-                borderWidth: 0,
-                borderColor: [0, 0, 0, 0],
-                borderEnable: false,
-                dashboard: lensDashboard,
-                visible: false,
-                label: 'Lens On/Off'
-            });
-            lime.canvas.addLayer('lens', lensLayer);
-
-            const controllerLens = new OpenLIME.ControllerFocusContext({
-                lensLayer: lensLayer,
-                camera: lime.camera,
-                canvas: lime.canvas,
-                priority: -200,
-                enableDirectContextControl: true
-            });
-            lime.pointerManager.onEvent(controllerLens);
-            lensLayer.controllers.push(controllerLens);
 
             OpenLIME.Skin.setUrl(config.skinUrl);
             let ui = new OpenLIME.UIBasic(lime, { skin: config.skinUrl, showLightDirections: false });
 
-            // Hide all UI actions and controls
-            ui.actions.zoomin.display = false;
-            ui.actions.zoomout.display = false;
-            ui.actions.ruler.display = false;
-            ui.actions.rotate.display = false;
-            ui.actions.snapshot.display = false;
-            ui.actions.layers.display = false;
-            ui.actions.help.display = false;
-            if (ui.actions.home) ui.actions.home.display = false;
-            if (ui.actions.fullscreen) ui.actions.fullscreen.display = false;
             // Enable light but hide its button and disable built-in click/drag control
             ui.actions.light.active = true;
             if (ui.actions.light) {
@@ -168,6 +112,7 @@
 
             // Ensure camera limits remain sane
             lime.camera.maxFixedZoom = 0;
+            lime.camera.wheelZoom = false;
             window.lime = lime;
 
             // Hide any remaining UI elements via CSS
@@ -177,18 +122,6 @@
                 .openlime-lightdir { display:none !important; }
             `;
             document.head.appendChild(__hideUiStyle);
-
-            
-            // Initial light position            
-            let initialX = 0.5; 
-            let initialY = 2;
-
-            // Sayfa yüklendiğinde ışığı oraya gönder
-            requestAnimationFrame(() => {
-                if (ui.lightcontroller && ui.lightcontroller.setPosition) {
-                ui.lightcontroller.setPosition(initialX, initialY);
-                }
-            });
 
             // Make the light follow mouse movement without clicking
             const __container = lime.containerElement || document.getElementById('demo');
@@ -221,17 +154,6 @@
                     });
                 }
             });
-
-            // Lens toggle is disabled
-            ui.actions.lenstoggle = {
-                title: 'Open/Close Lens (Magnifier)',
-                key: 'm',
-                display: false,
-                task: (event) => {
-                    lensLayer.setVisible(!lensLayer.visible);
-                    lensDashboard.container.style.display = lensLayer.visible ? 'block' : 'none';
-                }
-            };
         }
 
         init();
