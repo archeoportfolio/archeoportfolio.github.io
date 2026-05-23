@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8" />
 
-    <!-- Dynamically set stylesheet via config -->
     <link id="skinCssLink" rel="stylesheet" href="" />
 
     <style>
@@ -115,16 +114,81 @@
             lime.camera.wheelZoom = false;
             window.lime = lime;
 
-            // Hide any remaining UI elements via CSS
+            // Hide any remaining UI elements via CSS (including scale bar classes)
             const __hideUiStyle = document.createElement('style');
             __hideUiStyle.innerHTML = `
                 .openlime-toolbar, .openlime-menu, .openlime-sidebar, .openlime-topbar, .openlime-footer, .openlime-controls, .openlime-menu-button, .openlime-panel { display:none !important; }
                 .openlime-lightdir { display:none !important; }
+                .openlime-scalebar, .openlime-scale, .openlime-scale-bar { display:none !important; }
             `;
             document.head.appendChild(__hideUiStyle);
 
-            // Make the light follow mouse movement without clicking
+            // ========================================================
+            // FIT TO WIDTH: image fills the viewport horizontally (100%)
+            // regardless of window width. Height may overflow or leave gaps.
+            // ========================================================
             const __container = lime.containerElement || document.getElementById('demo');
+
+            function fitToWidth() {
+                try {
+                    // Get the layer's bounding box
+                    const box = baseLayer.boundingBox();
+                    if (!box) return;
+
+                    const imgW = box.width();
+                    const imgH = box.height();
+                    if (!imgW || !imgH) return;
+
+                    const rect = __container.getBoundingClientRect();
+                    const viewW = rect.width;
+                    const viewH = rect.height;
+                    if (!viewW || !viewH) return;
+
+                    // Camera maps image-space to viewport-space.
+                    // To make the image fill the viewport horizontally,
+                    // zoom must be: viewportWidth / imageWidth.
+                    const z = viewW / imgW;
+
+                    // Center the image (bbox center) on the viewport center
+                    const cx = (box.xLow + box.xHigh) / 2;
+                    const cy = (box.yLow + box.yHigh) / 2;
+
+                    // setPosition(dt, x, y, z, a) -> x,y is the camera offset
+                    // (negative of image-space center to recenter)
+                    lime.camera.setPosition(0, -cx, -cy, z, 0);
+                } catch (e) {
+                    console.warn('fitToWidth failed:', e);
+                }
+            }
+
+            // Run initial fit when the layer is ready
+            baseLayer.addEvent('ready', () => {
+                fitToWidth();
+            });
+
+            // Layer may already be ready (race condition) - retry just in case
+            if (baseLayer.status === 'ready') {
+                fitToWidth();
+            }
+
+            // Re-fit on window resize
+            let __resizeTimer = null;
+            window.addEventListener('resize', () => {
+                clearTimeout(__resizeTimer);
+                __resizeTimer = setTimeout(() => {
+                    fitToWidth();
+                }, 100);
+            });
+
+            // Some viewers also fire an internal updateSize event
+            if (lime.canvas && lime.canvas.addEvent) {
+                lime.canvas.addEvent('updateSize', () => {
+                    fitToWidth();
+                });
+            }
+            // ========================================================
+
+            // Make the light follow mouse movement without clicking
             // Throttle updates with requestAnimationFrame to avoid flooding updates
             let __pendingLightUpdate = false;
             const __lightPos = { x: 0, y: 0 };
