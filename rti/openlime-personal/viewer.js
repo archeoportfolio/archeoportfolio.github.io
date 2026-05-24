@@ -65,6 +65,22 @@ async function _initLayers(config) {
     window._rtiBaseLayer = baseLayer;
     baseLayer.addEvent('ready', () => {
         baseLayer.setMode('diffuse');
+        if (config.rotate) {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const iw = (baseLayer.layout && baseLayer.layout.width  > 0
+                        ? baseLayer.layout.width  : vw);
+            const ih = (baseLayer.layout && baseLayer.layout.height > 0
+                        ? baseLayer.layout.height : vh);
+            const z  = (lime.camera.target && lime.camera.target.z) || 1;
+            let adj  = 1;
+            if (Math.abs(config.rotate % 180) === 90) {
+                const scaleOrig = Math.min(vw / iw, vh / ih);
+                const scaleNew  = Math.min(vw / ih, vh / iw);
+                adj = scaleOrig > 0 ? scaleNew / scaleOrig : 1;
+            }
+            lime.camera.setPosition(0, 0, 0, z * adj, config.rotate);
+        }
     });
 
     /* ── Vector overlay layer
@@ -80,57 +96,6 @@ async function _initLayers(config) {
     });
     lime.canvas.addLayer('vector', vectorLayer);
     window._vectorLayer = vectorLayer;
-
-    /* ── Lens content layer
-       A duplicate RTI layer locked to specular mode.
-       Rendered exclusively inside the magnifier lens.              */
-    const lensContentLayer = new OpenLIME.Layer({
-        layout:  layout,
-        type:    'rti',
-        url:     config.rtiUrl,
-        normals: normals,
-        visible: false,
-        label:   'Lens'
-    });
-    lime.canvas.addLayer('RTI Normals', lensContentLayer);
-    lensContentLayer.addEvent('ready', () => {
-        lensContentLayer.setMode('specular');
-    });
-
-    /* ── Lens radial navigator dashboard */
-    const lensDashboard = new OpenLIME.LensDashboardNavigatorRadial(lime, {
-        borderColor: [0, 0, 0, 0],
-        borderWidth: 0
-    });
-
-    /* ── Magnifier lens layer
-       Circular loupe overlaid on the canvas. Shows the lens
-       content layer inside and the base RTI outside.               */
-    const lensLayer = new OpenLIME.Layer({
-        type:         'lens',
-        layers:       [lensContentLayer],
-        camera:       lime.camera,
-        radius:       400,
-        borderEnable: false,
-        dashboard:    lensDashboard,
-        visible:      false,
-        label:        'Lens On/Off'
-    });
-    lime.canvas.addLayer('lens', lensLayer);
-    window._lensLayer = lensLayer;
-
-    /* ── Lens focus-context controller
-       Handles pointer interactions for moving and resizing
-       the magnifier lens.                                           */
-    const controllerLens = new OpenLIME.ControllerFocusContext({
-        lensLayer: lensLayer,
-        camera:    lime.camera,
-        canvas:    lime.canvas,
-        priority:  -200
-    });
-    lensLayer.controllers.push(controllerLens);
-    lime.pointerManager.onEvent(controllerLens);
-
 
     /* ══════════════════════════════════════════════════════════════
        SECTION 3 — TOOLBAR & UI ACTIONS
@@ -158,14 +123,6 @@ async function _initLayers(config) {
 
     lime.camera.maxFixedZoom  = 1;
     window.lime = lime;
-
-    /* Lens toggle — M key kept in sync with the mode-bar button via toggleLens() */
-    ui.actions.lenstoggle = {
-        title:   'Open/Close Lens (Magnifier)',
-        key:     'm',
-        display: false,
-        task:    () => { toggleLens(); }
-    };
 
     /* Vector toggle — keyboard shortcut kept in sync with the
        mode-bar button via toggleVectorLayer()                       */
@@ -218,7 +175,6 @@ function _setupLightHighlight() {
    toggleModeBar()      — slides the rendering-mode bar in or out
    toggleHelpPanel()    — slides the help panel in or out
    setRTIMode(mode)     — switches RTI shading mode and updates button state
-   toggleLens()         — toggles the magnifier lens
    toggleVectorLayer()  — toggles the vector overlay
 ══════════════════════════════════════════════════════════════════ */
 
@@ -242,12 +198,6 @@ function initViewer(config) {
                 <li><strong>Specular</strong> — Specular reflectance</li>
                 <li><strong>Gray Diffuse</strong> — Greyscale diffuse</li>
                 <li><strong>Vector</strong> — Toggle vector overlay (also <strong>V</strong>)</li>
-                <li><strong>Lens</strong> — Toggle magnifier lens (also <strong>M</strong>)</li>
-            </ul>
-            <h5>Magnifier Lens</h5>
-            <ul>
-                <li>The lens shows specular mode; the surrounding area shows the base RTI.</li>
-                <li>Drag to reposition; scroll inside the lens to resize.</li>
             </ul>
             <h5>Ruler</h5>
             <ul>
@@ -258,7 +208,6 @@ function initViewer(config) {
             <ul>
                 <li><strong>L</strong> — Light control</li>
                 <li><strong>Z</strong> — Toggle mode bar</li>
-                <li><strong>M</strong> — Toggle magnifier lens</li>
                 <li><strong>V</strong> — Toggle vector overlay</li>
                 <li><strong>C</strong> — Toggle ruler</li>
                 <li><strong>A</strong> — Rotate view</li>
@@ -278,50 +227,27 @@ function initViewer(config) {
             <button id="btn-specular"     onclick="setRTIMode('specular')">Specular</button>
             <button id="btn-gray_diffuse" onclick="setRTIMode('gray_diffuse')">Gray Diffuse</button>
             <button id="btn-vector"       onclick="toggleVectorLayer()">Vector Off</button>
-            <button id="btn-lens"         onclick="toggleLens()">Lens Off</button>
         </div>
     `);
 
-    /* Intercept wheel events: slow down zoom and correct OpenLIME's inverted Y axis */
-    let _busy = false;
+    /* Intercept wheel events: control zoom speed directly via camera API */
     document.getElementById('demo').addEventListener('wheel', (e) => {
-        if (_busy) return;
         e.stopImmediatePropagation();
         e.preventDefault();
-        _busy = true;
-        const rect = e.currentTarget.getBoundingClientRect();
-        const slow = new WheelEvent('wheel', {
-            bubbles: true, cancelable: true,
-            view: window,
-            clientX: e.clientX,
-            clientY: rect.top + rect.bottom - e.clientY,
-            screenX: e.screenX, screenY: e.screenY,
-            ctrlKey: e.ctrlKey, shiftKey: e.shiftKey,
-            altKey: e.altKey,   metaKey: e.metaKey,
-            button: e.button,   buttons: e.buttons,
-            deltaX: e.deltaX * 0.3, deltaY: e.deltaY * 0.3, deltaZ: e.deltaZ,
-            deltaMode: e.deltaMode
-        });
-        e.target.dispatchEvent(slow);
-        _busy = false;
+        if (!window.lime) return;
+        const cam = window.lime.camera;
+        let delta = e.deltaY;
+        if (e.deltaMode === 1) delta *= 30;   // line → pixels
+        if (e.deltaMode === 2) delta *= 300;  // page → pixels
+        const z = (cam.target.z || 1) * Math.pow(2, -delta * 0.0003);
+        cam.setPosition(50, cam.target.x || 0, cam.target.y || 0,
+                        Math.max(0.05, z), cam.target.a || 0);
     }, { capture: true, passive: false });
 
     const script = document.createElement('script');
     script.src   = config.openlimeUrl;
     document.head.appendChild(script);
     script.onload = () => _initLayers(config);
-}
-
-function toggleLens() {
-    if (window._lensLayer) {
-        const isVisible = window._lensLayer.visible;
-        window._lensLayer.setVisible(!isVisible);
-        const btn = document.getElementById('btn-lens');
-        if (btn) {
-            btn.classList.toggle('active', !isVisible);
-            btn.textContent = isVisible ? 'Lens Off' : 'Lens On';
-        }
-    }
 }
 
 function toggleHelpPanel() {
@@ -361,7 +287,7 @@ function setRTIMode(mode) {
     if (window._rtiBaseLayer) {
         window._rtiBaseLayer.setMode(mode);
     }
-    document.querySelectorAll('#mode-bar button:not(#btn-vector):not(#btn-lens)')
+    document.querySelectorAll('#mode-bar button:not(#btn-vector)')
             .forEach(b => b.classList.remove('active'));
     const btn = document.getElementById('btn-' + mode);
     if (btn) btn.classList.add('active');
